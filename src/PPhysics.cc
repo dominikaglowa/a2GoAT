@@ -163,6 +163,41 @@ void PPhysics::GoosyVuprom(TH1* hist)
     delete temp;
 }
 
+//stuff from the old file
+void PPhysics::FillMissingMomentum(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning)
+{
+	for (Int_t i = 0; i < tree.GetNParticles(); i++)
+	{
+		for (Int_t j = 0; j < tagger->GetNTagged(); j++)
+		{
+			FillMissingMomentum(tree, i, j, gHist, TaggerBinning);
+		}
+	}
+}
+
+void PPhysics::FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning)
+{
+    for (Int_t i = 0; i < tagger->GetNTagged(); i++)
+	{
+        FillMissingMomentum(tree, particle_index, i, gHist, TaggerBinning);
+	}
+}
+
+void PPhysics::FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning)
+{
+    // calc particle time diff
+    time = tagger->GetTagged_t(tagger_index) - tree.GetTime(particle_index);
+    
+    // calc missing p4
+    missingp4 = CalcMissingP4(tree, particle_index,tagger_index);
+
+	// Fill GH1
+	gHist->Fill(missingp4.Rho()/197.3,time);					
+
+}
+
+//
+
 void PPhysics::FillMissingMass(const GTreeParticle& tree, TH1* Hprompt, TH1* Hrandom)
 {
     for (Int_t i = 0; i < tree.GetNParticles(); i++)
