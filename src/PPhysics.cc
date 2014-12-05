@@ -353,6 +353,50 @@ void PPhysics::FillDeltaE(const GTreeMeson& tree, Int_t particle_index, Int_t ta
 
 }
 
+void PPhysics::FillDeltaE_Missmom(const GTreeMeson& tree, GH1** gHist, Bool_t TaggerBinning)
+{
+	for (Int_t i = 0; i < tree.GetNParticles(); i++)
+	{
+		for (Int_t j = 0; j < tagger->GetNTagged(); j++)
+		{
+		  FillDeltaE_Missmom(tree, i, j, gHist, TaggerBinning);
+		}
+	}
+}
+
+void PPhysics::FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, GH1** gHist, Bool_t TaggerBinning)
+{
+    for (Int_t i = 0; i < tagger->GetNTagged(); i++)
+	{
+	  FillDeltaE_Missmom(tree, particle_index, i, gHist, TaggerBinning);
+	}
+}
+
+void PPhysics::FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index, GH1** gHist, Bool_t TaggerBinning)
+{
+  double qmin=0.0; //min and max in fm^-1
+  double qmax=1.5;
+  int nqbin = 300;
+  int qbin;
+  int nEbin=23;
+  int Ebin=-1;
+  double Ebin_v[] = {135,140,145,150,160,170,180,190,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,580};
+    
+    // calc particle time diff
+    time = tagger->GetTagged_t(tagger_index) - tree.GetTime(particle_index);
+    Double_t q=CalcMissingMomentumD(tree,particle_index,tagger_index);
+    Double_t E_beam=CalcBeamE(tagger_index);
+    Double_t DeltaE=CalcDeltaED(tree,particle_index,tagger_index);
+
+    for (int i=0; i<nEbin; i++) {
+      if (E_beam >= Ebin_v[i] && E_beam<Ebin_v[i+1]) Ebin=i; 
+    }
+    qbin = int(TMath::Floor(q*200)); //change this when rebinning in q so qbin=1
+    if ( Ebin != -1 && qbin >0 && qbin< nqbin ) {
+      gHist[qbin*nEbin+Ebin]->Fill(DeltaE,time);
+    }
+}
+
 
 //
 //
@@ -382,8 +426,6 @@ TLorentzVector PPhysics::CalcMissingP4(const GTreeParticle& tree, Int_t particle
 //
 //from the old file
 //
-
-
 Double_t PPhysics::CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index)
 {
   particle	= tree.Particle(particle_index);
@@ -422,6 +464,33 @@ Double_t PPhysics::CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, Int
   
 }
 
+Double_t PPhysics::CalcBeamE(Int_t tagger_index){
+  return tagger->GetPhotonBeam_E(tagger_index);
+}
+
+Double_t PPhysics::CalcMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index)
+{
+  particle	= tree.Particle(particle_index);
+  beam 		= TLorentzVector(0.,0.,tagger->GetPhotonBeam_E(tagger_index),tagger->GetPhotonBeam_E(tagger_index));
+  
+  
+  double theta_pi0 = particle.Theta(); // theta pi0
+  double mpi0 = 134.9766;
+  double costheta = TMath::Cos(theta_pi0);
+  double beta = beam.E()/(beam.E()+target.M());
+  double Egamma_c = beam.E()*TMath::Sqrt( (1-beta)/(1+beta) );
+  double gamma_l = 1./(TMath::Sqrt(1-beta*beta));
+  double minv = 2*beam.E()*target.M() + target.M2();
+  double Epi_c = TMath::Sqrt(minv)/2. + (mpi0*mpi0 - target.M2())/(2.*TMath::Sqrt(minv));
+  double Epi = (Epi_c + TMath::Sqrt( Epi_c*Epi_c - ( 1 - beta*beta*costheta*costheta )*( gamma_l*gamma_l*beta*beta*mpi0*mpi0*costheta*costheta + Epi_c*Epi_c ) ) ) / ( gamma_l*(1-beta*beta*costheta*costheta) );
+
+  double qsq = (Egamma_c - Epi_c)*(Egamma_c - Epi_c) + 2.*beam.E()*(Epi - TMath::Sqrt(Epi*Epi - mpi0*mpi0)*costheta) - mpi0*mpi0;
+
+  Double_t q = TMath::Sqrt(qsq)/197.3;
+    
+  return q;
+  
+}
 //
 
 void PPhysics::FillBeamAsymmetry(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning, Double_t MM_min, Double_t MM_max)
