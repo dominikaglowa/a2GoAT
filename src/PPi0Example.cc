@@ -16,7 +16,9 @@ PPi0Example::PPi0Example()
 
     //stuff from the old file
     MMom		= new GH1("MMom", 	"MMom;q(fm^{-1})", 	 	400, 0., 2.0);     
-    MMom_2g	= new GH1("MMom_2g", 	"MMom_2g;q(fm^{-1})", 	400,   0, 2.0); 
+    MMom_2g	= new GH1("MMom_2g", 	"MMom_2g;q(fm^{-1})", 	400,   0, 2.0);
+    MMomD		= new GH1("MMomD", 	"MMom;q(fm^{-1})", 	 	400, 0., 2.0);     
+    MMomD_2g	= new GH1("MMomDan_2g", 	"MMom_2g;q(fm^{-1})", 	400,   0, 2.0); 
     //
 }
 

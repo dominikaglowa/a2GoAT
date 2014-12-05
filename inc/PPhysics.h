@@ -83,9 +83,9 @@ public:
 	//	void	FillDeltaE_Missmom(const GTreeMeson& tree, GH1** gHist, Bool_t TaggerBinning = kFALSE);
 	//	void	FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, GH1** gHist, Bool_t TaggerBinning = kFALSE);
 	//	void 	FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index, GH1** gHist, Bool_t TaggerBinning = kFALSE);
-	//	void	FillMissingMomentumD(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning = kFALSE);
-	//	void	FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
-	//	void 	FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+		void	FillMissingMomentumD(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+		void	FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+		void 	FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
 	//
     Double_t CalcMissingMass(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
     Double_t CalcMissingEnergy(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
