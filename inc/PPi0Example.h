@@ -22,7 +22,16 @@ private:
 
     GH1*	MM;
     GH1*	MM_2g;
+    //stuff from the old file 
+    GH1*	MMom;
+    GH1*	MMom_2g; 
 
+    GH1*	MMomD;
+    GH1*	MMomD_2g; 
+
+    GH1*	DeltaE_CM_D_2g; 
+    GH1*       DeltaE_Missmom_BeamE[7000];
+    //
     TH1*	TaggerAccScal;
 
     string  	config;

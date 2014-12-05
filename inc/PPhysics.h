@@ -10,6 +10,10 @@
 #include "GH1.h"
 #include "GConfigFile.h"
 
+//stuff added from the old file
+#include <TH3.h>
+#include <TH2F.h>
+//
 
 class	PPhysics : virtual public GTreeManager
 {
@@ -57,10 +61,30 @@ public:
 	void	FillMissingMass(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
 	void 	FillMissingMass(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
 
+	//stuff from the old file (added Bool_t to match the new syntax for FillBlah)
+	void	FillMissingMomentum(const GTreeParticle& tree, GH1* gHist,Bool_t TaggerBinning = kFALSE);
+	void	FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void 	FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	//	void	FillDeltaE(const GTreeMeson& tree, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	//	void	FillDeltaE(const GTreeMeson& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	//	void 	FillDeltaE(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	//	void	FillDeltaE_Missmom(const GTreeMeson& tree, GH1** gHist, Bool_t TaggerBinning = kFALSE);
+	//	void	FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, GH1** gHist, Bool_t TaggerBinning = kFALSE);
+	//	void 	FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index, GH1** gHist, Bool_t TaggerBinning = kFALSE);
+	//	void	FillMissingMomentumD(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	//	void	FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	//	void 	FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	//
     Double_t CalcMissingMass(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
     Double_t CalcMissingEnergy(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
     TLorentzVector CalcMissingP4(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
-
+    
+//stuff from the old file
+//	Double_t CalcMissingMomentum(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
+//	Double_t CalcMissingMomentumD(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
+//	Double_t CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
+//	Double_t CalcBeamE(Int_t tagger_index);
+//
 	void 	FillBeamAsymmetry(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE, Double_t MM_min = -100000, Double_t MM_max = 100000);
 	void 	FillBeamAsymmetry(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE, Double_t MM_min = -100000, Double_t MM_max = 100000);
 

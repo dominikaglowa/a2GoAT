@@ -15,6 +15,10 @@ PPi0Example::PPi0Example()
     MM_2g	= new GH1("MM_2g", 	"MM_2g", 	400,   800, 1200);
 
     TaggerAccScal = new TH1D("TaggerAccScal","TaggerAccScal",352,0,352);
+    //stuff from the old file
+    MMom		= new GH1("MMom", 	"MMom;q(fm^{-1})", 	 	400, 0., 2.0);     
+    MMom_2g	= new GH1("MMom_2g", 	"MMom_2g;q(fm^{-1})", 	400,   0, 2.0); 
+    //
 }
 
 PPi0Example::~PPi0Example()
@@ -60,7 +64,11 @@ void	PPi0Example::ProcessEvent()
 	
 	// fill invariant mass, all pi0
 	FillMass(*pi0,IM);
-		
+
+   //stuff from the old file
+	// fill missing momentum, all pi0
+	FillMissingMomentum(*pi0,MMom);
+	//	
     // Some neutral decays
     for (Int_t i = 0; i < pi0->GetNParticles(); i++)
     {
