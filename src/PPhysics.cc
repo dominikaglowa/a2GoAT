@@ -63,41 +63,6 @@ void PPhysics::FillScalers(Int_t low_scaler_number, Int_t high_scaler_number, TH
 	hist->Add(hist_current_SR);
 }	
 
-//stuff from the old file
-void PPhysics::FillMissingMomentum(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning)
-{
-	for (Int_t i = 0; i < tree.GetNParticles(); i++)
-	{
-		for (Int_t j = 0; j < tagger->GetNTagged(); j++)
-		{
-			FillMissingMomentum(tree, i, j, gHist, TaggerBinning);
-		}
-	}
-}
-
-void PPhysics::FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning)
-{
-    for (Int_t i = 0; i < tagger->GetNTagged(); i++)
-	{
-        FillMissingMomentum(tree, particle_index, i, gHist, TaggerBinning);
-	}
-}
-
-void PPhysics::FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning)
-{
-    // calc particle time diff
-    time = tagger->GetTagged_t(tagger_index) - tree.GetTime(particle_index);
-    
-    // calc missing p4
-    missingp4 = CalcMissingP4(tree, particle_index,tagger_index);
-
-	// Fill GH1
-	gHist->Fill(missingp4.Rho()/197.3,time);					
-
-}
-
-//
-
 void PPhysics::FillMissingMass(const GTreeParticle& tree, TH1* Hprompt, TH1* Hrandom)
 {
     for (Int_t i = 0; i < tree.GetNParticles(); i++)
@@ -279,6 +244,84 @@ void PPhysics::FillMissingMass(const GTreeParticle& tree, Int_t particle_index, 
 
 }
 
+//stuff from the old file
+void PPhysics::FillMissingMomentum(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning)
+{
+	for (Int_t i = 0; i < tree.GetNParticles(); i++)
+	{
+		for (Int_t j = 0; j < tagger->GetNTagged(); j++)
+		{
+			FillMissingMomentum(tree, i, j, gHist, TaggerBinning);
+		}
+	}
+}
+
+void PPhysics::FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning)
+{
+    for (Int_t i = 0; i < tagger->GetNTagged(); i++)
+	{
+        FillMissingMomentum(tree, particle_index, i, gHist, TaggerBinning);
+	}
+}
+void PPhysics::FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning)
+{
+    // calc particle time diff
+    time = tagger->GetTagged_t(tagger_index) - tree.GetTime(particle_index);
+    
+    // calc missing p4
+    missingp4 = CalcMissingP4(tree, particle_index,tagger_index);
+
+	// Fill GH1
+	gHist->Fill(missingp4.Rho()/197.3,time);					
+
+}
+
+void PPhysics::FillMissingMomentumD(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning)
+{
+	for (Int_t i = 0; i < tree.GetNParticles(); i++)
+	{
+		for (Int_t j = 0; j < tagger->GetNTagged(); j++)
+		{
+		  FillMissingMomentumD(tree, i, j, gHist, TaggerBinning);
+		}
+	}
+}
+
+void PPhysics::FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning)
+{
+    for (Int_t i = 0; i < tagger->GetNTagged(); i++)
+	{
+        FillMissingMomentumD(tree, particle_index, i, gHist, TaggerBinning);
+	}
+}
+
+void PPhysics::FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning)
+{
+    // calc particle time diff
+    time = tagger->GetTagged_t(tagger_index) - tree.GetTime(particle_index);
+    
+    particle	= tree.Particle(particle_index);
+    beam 		= TLorentzVector(0.,0.,tagger->GetPhotonBeam_E(tagger_index),tagger->GetPhotonBeam_E(tagger_index));
+  
+  
+    double theta_pi0 = particle.Theta(); // theta pi0
+    double mpi0 = 134.9766;
+    double costheta = TMath::Cos(theta_pi0);
+    double beta = beam.E()/(beam.E()+target.M());
+    double Egamma_c = beam.E()*TMath::Sqrt( (1-beta)/(1+beta) );
+    double gamma_l = 1./(TMath::Sqrt(1-beta*beta));
+    double minv = 2*beam.E()*target.M() + target.M2();
+    double Epi_c = TMath::Sqrt(minv)/2. + (mpi0*mpi0 - target.M2())/(2.*TMath::Sqrt(minv));
+    double Epi = (Epi_c + TMath::Sqrt( Epi_c*Epi_c - ( 1 - beta*beta*costheta*costheta )*( gamma_l*gamma_l*beta*beta*mpi0*mpi0*costheta*costheta + Epi_c*Epi_c ) ) ) / ( gamma_l*(1-beta*beta*costheta*costheta) );
+
+    double qsq = (Egamma_c - Epi_c)*(Egamma_c - Epi_c) + 2.*beam.E()*(Epi - TMath::Sqrt(Epi*Epi - mpi0*mpi0)*costheta) - mpi0*mpi0;
+    Double_t q = TMath::Sqrt(qsq)/197.3;
+
+	// Fill GH1
+	gHist->Fill(q,time);					
+}
+
+//
 Double_t PPhysics::CalcMissingMass(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index)
 {
     missingp4 	= CalcMissingP4(tree, particle_index, tagger_index);
