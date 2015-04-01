@@ -46,10 +46,11 @@ print_usage()
 init_values()
 {
 #set the defaults
-    sleeptime=5
-    default_maxq="500";
+    sleeptime=0
+    default_maxq="3000";
     rev="";
     maxq="${default_maxq}";
+    waittime="5m";
 }
 
 #  Function to set the command line options
@@ -114,10 +115,10 @@ do
 	jobgo=`echo $jobcount | gawk -v maxq=$maxq '{if ($1>=maxq){print"wait"}else{print"go"}}'`
 
 	while [ "$jobgo" = "wait" ]; do
+	    echo "There are aleady $jobcount jobs queued. Waiting until it drops below $maxq. Trying again in $waittime"
+	    sleep $waittime
 	    jobcount=`qstat -u ${USER} | gawk '{if(($10=="Q")||($10=="H")||($10=="R")) print $0}' | wc -l`
-	    echo "There are aleady $jobcount jobs queued. Waiting until it drops below $maxq. Trying again in 5 min"
 	    jobgo=`echo $jobcount | gawk -v maxq=$maxq '{if ($1>=maxq){print"wait"}else{print"go"}}'`
-	    sleep 5m
 	done
 
 	#OK to go

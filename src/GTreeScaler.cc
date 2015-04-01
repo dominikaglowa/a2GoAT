@@ -4,13 +4,13 @@
 
 
 GTreeScaler::GTreeScaler(GTreeManager *Manager)    :
-    GTree(Manager, TString("treeScaler"), kTRUE),
-    EventNumber(0),
-    EventID(0),
-    NScaler(0)
+    GTree(Manager, TString("scalers"), kTRUE),
+    eventNumber(0),
+    eventID(0),
+    nScalers(0)
 {
-    for(int i=0; i<GTreeScaler_MAX; i++)
-        Scaler[i] = 0;
+    for(Int_t i=0; i<GTreeScaler_MAX; i++)
+        scalers[i] = 0;
 }
 
 GTreeScaler::~GTreeScaler()
@@ -20,30 +20,30 @@ GTreeScaler::~GTreeScaler()
 
 void    GTreeScaler::SetBranchAdresses()
 {
-    tree_in->SetBranchAddress("eventNumber", &EventNumber);
-    tree_in->SetBranchAddress("eventID", &EventID);
-    NScaler = tree_in->GetLeaf("Scaler")->GetLen();
-    if(NScaler<=GTreeScaler_MAX)
-        tree_in->SetBranchAddress("Scaler", Scaler);
+    inputTree->SetBranchAddress("eventNumber", &eventNumber);
+    inputTree->SetBranchAddress("eventID", &eventID);
+    nScalers = inputTree->GetLeaf("scalers")->GetLen();
+    if(nScalers<=GTreeScaler_MAX)
+        inputTree->SetBranchAddress("scalers", scalers);
 }
 
 void    GTreeScaler::SetBranches()
 {
-    tree_out->Branch("eventNumber", &EventNumber, "eventNumber/I");
-    tree_out->Branch("eventID", &EventID, "eventID/I");
+    outputTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
+    outputTree->Branch("eventID", &eventID, "eventID/I");
     Char_t str[256];
-    sprintf(str, "Scaler[%d]/i", NScaler);
-    tree_out->Branch("Scaler", Scaler, str);
+    sprintf(str, "scalers[%d]/i", nScalers);
+    outputTree->Branch("scalers", scalers, str);
 }
 
 
-UInt_t  GTreeScaler::GetScalerEntry(const Int_t event_number)
+UInt_t  GTreeScaler::GetScalerEntry(const Int_t number)
 {
     if(!IsOpenForInput())
     {
         if(!OpenForInput())
         {
-            std::cout << "Can not open treeScaler in input file." << std::endl;
+            std::cout << "Can not open Scaler tree in input file." << std::endl;
             return 0;
         }
     }
@@ -51,19 +51,19 @@ UInt_t  GTreeScaler::GetScalerEntry(const Int_t event_number)
     for(Int_t i=0; i<GetNEntries(); i++)
     {
         GetEntry(i);
-        if(event_number<EventNumber)
+        if(number<eventNumber)
             return i;
     }
 }
 
 
-void    GTreeScaler::SetNScaler(const Int_t num)
+void    GTreeScaler::SetNScalers(const Int_t number)
 {
-    NScaler = num;
-    if(NScaler>GTreeScaler_MAX)
+    nScalers = number;
+    if(nScalers>GTreeScaler_MAX)
     {
-        std::cout << "#ERROR# GTreeScaler::SetNScaler(const Int_t num): Can not handle " << num << " Scalers! Set to max (" << GTreeScaler_MAX << ")." << std::endl;
-        NScaler = GTreeScaler_MAX;
+        std::cout << "#ERROR# GTreeScaler::SetNScaler(const Int_t num): Can not handle " << number << " Scalers! Set to max (" << GTreeScaler_MAX << ")." << std::endl;
+        nScalers = GTreeScaler_MAX;
     }
 }
 
@@ -71,10 +71,10 @@ void    GTreeScaler::Print() const
 {
     GTree::Print();
 
-    std::cout << "GTreeScaler: EventNumber->" << EventNumber << " EventID->" << EventID << std::endl;
-    std::cout << "             NScaler->" << NScaler << std::endl;
-    for(int i=0; i<NScaler; i++)
-        std::cout << "Scaler " << i << ": " << Scaler[i] << std::endl;
+    std::cout << "GTreeScaler: eventNumber->" << eventNumber << " eventID->" << eventID << std::endl;
+    std::cout << "             nScalers->" << nScalers << std::endl;
+    for(Int_t i=0; i<nScalers; i++)
+        std::cout << "Scaler " << i << ": " << scalers[i] << std::endl;
 }
 
 void    GTreeScaler::CloneValidEntries()
@@ -96,7 +96,7 @@ void    GTreeScaler::CloneValidEntries()
         }
     }
 
-    for(int i=1; i<GetNEntries(); i++)
+    for(Int_t i=1; i<GetNEntries(); i++)
     {
         GetEntry(i);
         Fill();

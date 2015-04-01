@@ -4,20 +4,20 @@
 
 #include "GTreeManager.h"
 
-#define DEFAULT_PI0_IM_WIDTH 20.0
-#define DEFAULT_ETA_IM_WIDTH 44.0
-#define DEFAULT_ETAP_IM_WIDTH 60.0
+#define DEFAULT_WIDTH_NEUTRAL_PION 20.0
+#define DEFAULT_WIDTH_ETA 44.0
+#define DEFAULT_WIDTH_ETA_PRIME 60.0
 
 
 class  GMesonReconstruction  : virtual public GTreeManager
 {
 private:
-    Double_t	width_pi0;
-    Double_t	width_eta;
-    Double_t	width_etap;
+    Double_t	widthNeutralPion;
+    Double_t	widthEta;
+    Double_t	widthEtaPrime;
 
-    Double_t	meson_theta_min;
-    Double_t	meson_theta_max;
+    Double_t	mesonThetaMin;
+    Double_t	mesonThetaMax;
 
 protected:
 
@@ -30,9 +30,9 @@ public:
     virtual ~GMesonReconstruction();
 
             Bool_t  Init();
-            void    SetPi0Width(const Double_t width)   {width_pi0 = width;}
-            void    SetEtaWidth(const Double_t width)   {width_eta = width;}
-            void    SetEtapWidth(const Double_t width)  {width_etap = width;}
+            void    SetNeutralPionWidth(const Double_t width)   {widthNeutralPion = width;}
+            void    SetEtaWidth(const Double_t width)   {widthEta = width;}
+            void    SetEtaPrimeWidth(const Double_t width)  {widthEtaPrime = width;}
 };
 
 

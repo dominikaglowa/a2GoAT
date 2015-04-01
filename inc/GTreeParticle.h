@@ -2,27 +2,18 @@
 #define __GTreeParticle_h__
 
 
-#include <TClonesArray.h>
-#include <TLorentzVector.h>
+#include "Rtypes.h"
+#include "GTreeTrack.h"
 
-#include "GTree.h"
-
-#define GTreeParticle_MaxEntries  64
 
 class   GTreeMeson;
 
-class  GTreeParticle    : public GTree
+class  GTreeParticle    : public GTreeTrack
 {
 private:
-    UInt_t              nParticles;
-    TClonesArray*       particles;	// reconstructed
-    UChar_t             Apparatus[GTreeParticle_MaxEntries];
-    Double_t            time[GTreeParticle_MaxEntries];
-    UChar_t             clusterSize[GTreeParticle_MaxEntries];
-    //Charged detector energies
-    Double_t            d_E[GTreeParticle_MaxEntries];
-    Double_t            WC0_E[GTreeParticle_MaxEntries];
-    Double_t            WC1_E[GTreeParticle_MaxEntries];
+    Int_t               nParticles;
+    Double_t            mass[GTreeTrack_MAX];
+    Int_t               trackIndex[GTreeTrack_MAX];  // index of the corresponding tack in the track list, -1 => No track
 
 
 protected:
@@ -34,31 +25,29 @@ public:
     GTreeParticle(GTreeManager *Manager, const TString& _Name);
     virtual ~GTreeParticle();
 
-            void            AddParticle(const TLorentzVector& vec, const UChar_t _Apparatus = 0, const Double_t _d_E = 0, const Double_t _WC0_E = 0, const Double_t _WC1_E = 0, const Double_t _Time = 0, const UChar_t _ClusterSize = 0);
-    virtual void            Clear() {nParticles = 0; particles->Clear();}
-            UChar_t         GetApparatus(const Int_t index)     const	{return Apparatus[index];}
-            UChar_t         GetClusterSize(const Int_t index)   const 	{return clusterSize[index];}
-            Double_t        Get_dE(const Int_t index)           const	{return d_E[index];}
-            UInt_t          GetNParticles()                     const	{return nParticles;}
-    const	Double_t*       GetTime()                           const	{return time;}
-            Double_t        GetTime(const Int_t index)          const	{return time[index];}
-    const	Double_t*       GetWC0_E()                          const	{return WC0_E;}
-            Double_t        GetWC0_E(const Int_t index)         const	{return WC0_E[index];}
-    const	Double_t*       GetWC1_E()                          const	{return WC1_E;}
-            Double_t        GetWC1_E(const Int_t index)         const	{return WC1_E[index];}
-    inline          TLorentzVector& Particle(const Int_t particle);
-    inline  const   TLorentzVector& Particle(const Int_t particle) const;
+            void            AddParticle(const Double_t _clusterEnergy = 0, const Double_t _theta = 0, const Double_t _phi = 0, const Double_t _mass = 0, const Double_t _time = 0, const Int_t _clusterSize = 0, const Int_t _centralCrystal = -1, const Int_t _centralVeto = -1, const Int_t _detectors = 0, const Double_t _vetoEnergy = 0, const Double_t _MWPC0Energy = 0, const Double_t _MWPC1Energy = 0, const Int_t _trackIndex = -1);
+    virtual void            Clear() {nParticles = 0;}
+            Int_t           GetNParticles()                     const	{return nParticles;}
+            Double_t        GetKineticEnergy(const Int_t index) const   {return clusterEnergy[index];}
+    const   Double_t*       GetKineticEnergy()                  const   {return clusterEnergy; }
+            Double_t        GetTotalEnergy(const Int_t index)   const   {return (clusterEnergy[index]+mass[index]);}
+            Double_t        GetMass(const Int_t index)          const   {return mass[index];}
+    const   Double_t*       GetMass()                           const   {return mass; }
+            Int_t           GetTrackIndex(const Int_t index)    const   {return trackIndex[index];}
+    const   Int_t*          GetTrackIndex()                     const   {return trackIndex; }
+
+    inline          TLorentzVector Particle(const Int_t particle);
+    inline  const   TLorentzVector Particle(const Int_t particle) const;
     virtual void            Print() const;
             void            RemoveParticles(const Int_t nIndices, const Int_t* indices);
             void            RemoveAllParticles();
     virtual Bool_t          Write();
 
-
     friend  class GTreeMeson;
 };
 
 
-TLorentzVector&         GTreeParticle::Particle(const Int_t particle)
+TLorentzVector         GTreeParticle::Particle(const Int_t particle)
 {
     if(particle>=nParticles)
     {
@@ -67,10 +56,10 @@ TLorentzVector&         GTreeParticle::Particle(const Int_t particle)
         helpVectorUnity.SetPxPyPzE(0,0,0,0);
         return helpVectorUnity;
     }
-    return *((TLorentzVector*)particles->At(particle));
+    return GetVector(particle,GetMass(particle));
 }
 
-const   TLorentzVector& GTreeParticle::Particle(const Int_t particle) const
+const   TLorentzVector GTreeParticle::Particle(const Int_t particle) const
 {
     if(particle>=nParticles)
     {
@@ -79,7 +68,7 @@ const   TLorentzVector& GTreeParticle::Particle(const Int_t particle) const
         helpVectorUnity.SetPxPyPzE(0,0,0,0);
         return helpVectorUnity;
     }
-    return *((TLorentzVector*)particles->At(particle));
+    return GetVector(particle,GetMass(particle));
 }
 
 

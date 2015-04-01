@@ -7,7 +7,7 @@
 #include <TDatabasePDG.h>
 
 #include "GConfigFile.h"
-#include "GTreeRawEvent.h"
+#include "GTreeTrack.h"
 #include "GTreeTagger.h"
 #include "GTreeLinPol.h"
 #include "GTreeScaler.h"
@@ -15,9 +15,14 @@
 #include "GTreeMeson.h"
 #include "GTreeTrigger.h"
 #include "GTreeDetectorHits.h"
+#include "GTreeSetupParameters.h"
 #include "GTreeEventParameters.h"
 #include "GHistManager.h"
 
+#ifdef hasPluto
+#include "GTreePluto.h"
+#endif
+#include "GTreeA2Geant.h"
 
 #include <stdio.h>
 #include <TSystem.h>
@@ -26,11 +31,13 @@
 class  GTreeManager : public GHistManager, public GConfigFile
 {
 private:
-    TFile*      file_in;
+    TFile*      inputFile;
     TObjArray   treeList;
     TObjArray   treeCorreleatedToScalerReadList;
+    TObjArray   treeSingleReadList;
     TObjArray   readList;
     TObjArray   readCorreleatedToScalerReadList;
+    TObjArray   readSingleReadList;
     TObjArray   writeList;
     Bool_t      isWritten;
 
@@ -41,34 +48,93 @@ private:
             Bool_t      TraverseValidEvents_AcquTreeFile();
             Bool_t      TraverseValidEvents_GoATTreeFile();
 
-protected:
-    TFile*          file_out;
-
-private:
-    virtual TDirectory* GetOutputDirectory()    {return file_out;}
-
-protected:
-    GTreeRawEvent*      rawEvent;
+    //private tree variables
+    GTreeTrack*         tracks;
     GTreeTagger*        tagger;
     GTreeLinPol*        linpol;
     GTreeTrigger*       trigger;
     GTreeScaler*        scalers;
 
+    GTreeSetupParameters* setupParameters;
     GTreeEventParameters* eventParameters;
     GTreeDetectorHits*  detectorHits;
     GTreeParticle*      rootinos;
     GTreeParticle*      photons;
     GTreeParticle*      electrons;
-    GTreeParticle*      chargedPi;
+    GTreeParticle*      chargedPions;
     GTreeParticle*      protons;
     GTreeParticle*      neutrons;
-    GTreeMeson*         pi0;
-    GTreeMeson*         eta;
-    GTreeMeson*         etap;
+    GTreeMeson*         neutralPions;
+    GTreeMeson*         etas;
+    GTreeMeson*         etaPrimes;
+
+#ifdef hasPluto
+    GTreePluto*         pluto;
+#endif
+    GTreeA2Geant*       geant;
+
+protected:
+    TFile*          outputFile;
+
+    //protected tree variables Getters
+    GTreeTrack*   GetTracks()                 {return tracks;}
+    GTreeTagger*        GetTagger()                 {return tagger;}
+    GTreeLinPol*        GetLinpol()                 {return linpol;}
+    GTreeTrigger*       GetTrigger()                {return trigger;}
+    GTreeScaler*        GetScalers()                {return scalers;}
+
+    GTreeSetupParameters* GetSetupParameters()      {return setupParameters;}
+    GTreeEventParameters* GetEventParameters()      {return eventParameters;}
+    GTreeDetectorHits*  GetDetectorHits()           {return detectorHits;}
+    GTreeParticle*      GetRootinos()               {return rootinos;}
+    GTreeParticle*      GetPhotons()                {return photons;}
+    GTreeParticle*      GetElectrons()              {return electrons;}
+    GTreeParticle*      GetChargedPions()           {return chargedPions;}
+    GTreeParticle*      GetProtons()                {return protons;}
+    GTreeParticle*      GetNeutrons()               {return neutrons;}
+    GTreeMeson*         GetNeutralPions()           {return neutralPions;}
+    GTreeMeson*         GetEtas()                   {return etas;}
+    GTreeMeson*         GetEtaPrimes()              {return etaPrimes;}
+
+#ifdef hasPluto
+    GTreePluto*         GetPluto()                  {return pluto;}
+#endif
+    GTreeA2Geant*       GetGeant()                  {return geant;}
+
+    //protected tree variables const Getters
+    const   GTreeTrack*   GetTracks()             const       {return tracks;}
+    const   GTreeTagger*        GetTagger()             const       {return tagger;}
+    const   GTreeLinPol*        GetLinpol()             const       {return linpol;}
+    const   GTreeTrigger*       GetTrigger()            const       {return trigger;}
+    const   GTreeScaler*        GetScalers()            const       {return scalers;}
+
+    const   GTreeSetupParameters* GetSetupParameters()  const       {return setupParameters;}
+    const   GTreeEventParameters* GetEventParameters()  const       {return eventParameters;}
+    const   GTreeDetectorHits*  GetDetectorHits()       const       {return detectorHits;}
+    const   GTreeParticle*      GetRootinos()           const       {return rootinos;}
+    const   GTreeParticle*      GetPhotons()            const       {return photons;}
+    const   GTreeParticle*      GetElectrons()          const       {return electrons;}
+    const   GTreeParticle*      GetChargedPions()       const       {return chargedPions;}
+    const   GTreeParticle*      GetProtons()            const       {return protons;}
+    const   GTreeParticle*      GetNeutrons()           const       {return neutrons;}
+    const   GTreeMeson*         GetNeutralPions()       const       {return neutralPions;}
+    const   GTreeMeson*         GetEtas()               const       {return etas;}
+    const   GTreeMeson*         GetEtaPrimes()          const       {return etaPrimes;}
+
+#ifdef hasPluto
+    const   GTreePluto*         GetPluto()              const       {return pluto;}
+#endif
+    const   GTreeA2Geant*       GetGeant()              const       {return geant;}
+
+
+private:
+    virtual TDirectory* GetOutputDirectory()    {return outputFile;}
+
+protected:
 
     TDatabasePDG *pdgDB;
 
-            void    FillReadList()      {for(int l=0; l<readList.GetEntriesFast(); l++) ((GTree*)readList[l])->Fill();}
+            void    FillReadList()      {for(Int_t l=0; l<readList.GetEntriesFast(); l++) ((GTree*)readList[l])->Fill();}
     const   TObjArray&  GetTreeList()    const   {return treeList;}
     virtual void    ProcessEvent() = 0;
     virtual void    ProcessScalerRead() {}
@@ -86,14 +152,15 @@ public:
     virtual ~GTreeManager();
 
     static  Int_t   CheckInput(const char* input_filename);
-            UInt_t  GetEventNumber()    const   {return eventParameters->GetEventNumber();}
+            Int_t   GetEventNumber()    const   {return eventParameters->GetEventNumber();}
             UInt_t  GetNEntries()       const;
-            UInt_t  GetNReconstructed() const   {return countReconstructed;}
+            Int_t   GetNReconstructed() const   {return countReconstructed;}
             UInt_t  GetNScalerEntries() const;
             Bool_t  IsAcquFile()    const;
             Bool_t  IsGoATFile()    const;
             Bool_t  IsPhysicsFile()    const;
-            Bool_t  StartFile(const char* input_filename, const char* output_filename);
+            Bool_t  TraverseFiles();
+            Bool_t  StartFile(const char* inputFileName, const char* outputFileName);
 
     friend  class GTree;
     friend  class GTreeParticle;

@@ -27,15 +27,12 @@ link_directories(${ROOT_LIBRARY_DIR})
 
 include_directories(inc)
 set(ROOT_LIBRARIES "${ROOT_LIBRARIES} -lEG")
-message(${ROOT_LIBRARIES})
-
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
-
-add_executable(goat
+set(GOAT_BASE
    inc/GTree.h
-   inc/GTreeRawEvent.h
+   inc/GTreeTrack.h
    inc/GTreeDetectorHits.h
    inc/GTreeTagger.h
    inc/GTreeLinPol.h
@@ -43,17 +40,14 @@ add_executable(goat
    inc/GTreeParticle.h
    inc/GTreeMeson.h
    inc/GTreeTrigger.h
+   inc/GTreeSetupParameters.h
    inc/GTreeEventParameters.h
+   inc/GTreeA2Geant.h
    inc/GHistManager.h
    inc/GTreeManager.h
-   inc/GConfigFile.h
-   inc/GDataChecks.h
-   inc/GParticleReconstruction.h
-   inc/GMesonReconstruction.h
-   inc/GSort.h
-   inc/GoAT.h
+   inc/GConfigFile.h   
    src/GTree.cc
-   src/GTreeRawEvent.cc
+   src/GTreeTrack.cc
    src/GTreeDetectorHits.cc
    src/GTreeTagger.cc
    src/GTreeLinPol.cc
@@ -61,61 +55,97 @@ add_executable(goat
    src/GTreeParticle.cc
    src/GTreeMeson.cc
    src/GTreeTrigger.cc
+   src/GTreeSetupParameters.cc
    src/GTreeEventParameters.cc
+   src/GTreeA2Geant.cc
    src/GHistManager.cc
    src/GTreeManager.cc
    src/GConfigFile.cc
+)
+
+set(GOAT_GHIST
+   inc/GH1.h
+   inc/GHistScaCor.h
+   src/GHistScaCor.cc
+   inc/GHistScaCor2.h
+   src/GHistScaCor2.cc
+   inc/GHistScaCor3.h
+   src/GHistScaCor3.cc
+   inc/GHistBGSub.h
+   src/GHistBGSub.cc
+   inc/GHistBGSub2.h
+   src/GHistBGSub2.cc
+   inc/GHistBGSub3.h
+   src/GHistBGSub3.cc
+   inc/GHistTaggerBinning.h
+   src/GHistTaggerBinning.cc
+   inc/GHistTaggerBinning2.h
+   src/GHistTaggerBinning2.cc
+)
+
+if( PLUTO )
+
+    find_package(Pluto)
+
+    if( PLUTO_FOUND )
+
+           set(GOAT_BASE
+              ${GOAT_BASE}
+              inc/GTreePluto.h
+              src/GTreePluto.cc
+           )
+
+           add_definitions( -DhasPluto )
+
+           include_directories(${PLUTO_INCLUDE_PATH})
+           link_directories(${PLUTO_LIBRARY_PATH})
+
+           set(LIBS ${LIB} ${PLUTO_LIBRARY})
+    endif()
+
+else()
+    message(STATUS "Pluto disabled")
+endif()
+
+
+add_executable(goat
+   ${GOAT_BASE}
+   inc/GDataChecks.h
    src/GDataChecks.cc
+   inc/GParticleReconstruction.h
    src/GParticleReconstruction.cc
+   inc/GMesonReconstruction.h
    src/GMesonReconstruction.cc
+   inc/GSort.h
    src/GSort.cc
+   inc/GoAT.h
    src/GoAT.cc
    src/goat_main.cc
    )
-target_link_libraries(goat ${ROOT_LIBRARIES})
-
+target_link_libraries(goat ${LIBS} ${ROOT_LIBRARIES})
 
 add_executable(pi0-example
-   inc/GTree.h
-   inc/GTreeRawEvent.h
-   inc/GTreeDetectorHits.h
-   inc/GTreeTagger.h
-   inc/GTreeLinPol.h
-   inc/GTreeScaler.h
-   inc/GTreeParticle.h
-   inc/GTreeMeson.h
-   inc/GTreeTrigger.h
-   inc/GTreeEventParameters.h
-   inc/GHistManager.h
-   inc/GTreeManager.h
-   inc/GConfigFile.h
-   inc/GHistTaggerBinning.h
-   inc/GHistBGSub.h
-   inc/GHistScaCor.h
-   inc/GH1.h
+   ${GOAT_BASE}
+   ${GOAT_GHIST}
    inc/PPhysics.h
-   inc/PPi0Example.h
-   src/GTree.cc
-   src/GTreeRawEvent.cc
-   src/GTreeDetectorHits.cc
-   src/GTreeTagger.cc
-   src/GTreeLinPol.cc
-   src/GTreeScaler.cc
-   src/GTreeParticle.cc
-   src/GTreeMeson.cc
-   src/GTreeTrigger.cc
-   src/GTreeEventParameters.cc
-   src/GHistManager.cc
-   src/GTreeManager.cc
-   src/GConfigFile.cc
-   src/GHistTaggerBinning.cc
-   src/GHistBGSub.cc
-   src/GHistScaCor.cc
    src/PPhysics.cc
+   inc/PPi0Example.h
    src/PPi0Example.cc
    src/pi0_example_main.cc
    )
-target_link_libraries(pi0-example ${ROOT_LIBRARIES})
+target_link_libraries(pi0-example ${LIBS} ${ROOT_LIBRARIES})
+
+
+add_executable(tin-pi0-physics
+   ${GOAT_BASE}
+   ${GOAT_GHIST}
+   inc/PPhysicsTin.h
+   src/PPhysicsTin.cc
+   inc/PTinPi0Physics.h
+   src/PTinPi0Physics.cc
+   src/tin_pi0-physics_main.cc
+   )
+target_link_libraries(tin-pi0-physics ${LIBS} ${ROOT_LIBRARIES})
 
 # install some scripts to the bin directory
 # by creating symlinks

@@ -21,7 +21,7 @@ GDataChecks::~GDataChecks()
 Bool_t	GDataChecks::Init()
 {
     std::string config = ReadConfig("CheckCBStability");
-    if( sscanf(config.c_str(),"%d %lf\n", (int*)(&CheckCBStability), &CBStabilityCutoff) == 2 )
+    if( sscanf(config.c_str(),"%d %lf\n", (Int_t*)(&CheckCBStability), &CBStabilityCutoff) == 2 )
 	{	
 		if(CheckCBStability)
 		{
@@ -29,7 +29,7 @@ Bool_t	GDataChecks::Init()
 			cout << "Using cutoff ratio of " << CBStabilityCutoff << endl << endl;	
 		}
 	}
-    else if( sscanf(config.c_str(),"%d\n", (int*)(&CheckCBStability)) == 1 )
+    else if( sscanf(config.c_str(),"%d\n", (Int_t*)(&CheckCBStability)) == 1 )
 	{	
 		if(CheckCBStability)
 		{
@@ -63,25 +63,25 @@ inline Bool_t 	GDataChecks::CheckCBHits(const Int_t min, const Int_t max)
     Int_t SumQ3 = 0;
     Int_t SumQ4 = 0;
 
-    if(!detectorHits->IsOpenForInput())
+    if(!GetDetectorHits()->IsOpenForInput())
     {
-        if(!detectorHits->OpenForInput())
+        if(!GetDetectorHits()->OpenForInput())
         {
-            cout << "Can not check CB Hits. Now treeDetectorHits available." << endl;
+            cout << "Can not check CB Hits. DetectorHits tree not available." << endl;
             return false;
         }
     }
 
-    for(int i=min; i<=max; i++)
+    for(Int_t i=min; i<=max; i++)
     {
-        detectorHits->GetEntry(i);
+        GetDetectorHits()->GetEntry(i);
 
-        for (int j=0; j<=detectorHits->GetNNaI_Hits(); j++)
+        for (Int_t j=0; j<=GetDetectorHits()->GetNNaIHits(); j++)
         {
-            if  (detectorHits->GetNaI_Hits(j) <  180) SumQ1++;
-            if ((detectorHits->GetNaI_Hits(j) >= 180) && (detectorHits->GetNaI_Hits(j) < 360)) SumQ2++;
-            if ((detectorHits->GetNaI_Hits(j) >= 360) && (detectorHits->GetNaI_Hits(j) < 540)) SumQ3++;
-            if ((detectorHits->GetNaI_Hits(j) >= 540) && (detectorHits->GetNaI_Hits(j) < 720)) SumQ4++;
+            if  (GetDetectorHits()->GetNaIHits(j) <  180) SumQ1++;
+            if ((GetDetectorHits()->GetNaIHits(j) >= 180) && (GetDetectorHits()->GetNaIHits(j) < 360)) SumQ2++;
+            if ((GetDetectorHits()->GetNaIHits(j) >= 360) && (GetDetectorHits()->GetNaIHits(j) < 540)) SumQ3++;
+            if ((GetDetectorHits()->GetNaIHits(j) >= 540) && (GetDetectorHits()->GetNaIHits(j) < 720)) SumQ4++;
         }
     }
 
@@ -92,10 +92,10 @@ inline Bool_t 	GDataChecks::CheckCBHits(const Int_t min, const Int_t max)
     if (SumQ4 < CBHitsThresh4) return kFALSE;
 
     // Set new baseline
-    CBHitsThresh1 = int(CBStabilityCutoff*SumQ1);
-    CBHitsThresh2 = int(CBStabilityCutoff*SumQ2);
-    CBHitsThresh3 = int(CBStabilityCutoff*SumQ3);
-    CBHitsThresh4 = int(CBStabilityCutoff*SumQ4);
+    CBHitsThresh1 = Int_t(CBStabilityCutoff*SumQ1);
+    CBHitsThresh2 = Int_t(CBStabilityCutoff*SumQ2);
+    CBHitsThresh3 = Int_t(CBStabilityCutoff*SumQ3);
+    CBHitsThresh4 = Int_t(CBStabilityCutoff*SumQ4);
 
     return kTRUE;
 

@@ -10,7 +10,7 @@ JobName=$3
 ####################################################
 
 #Who'll get the emails from the farm
-MailAddress="martel@kph.uni-mainz.de"
+MailAddress="$USER@kph.uni-mainz.de"
 
 ####################################################
 ###### End of section requiring editing ############

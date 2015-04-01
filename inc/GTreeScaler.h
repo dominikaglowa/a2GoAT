@@ -2,8 +2,7 @@
 #define __GTreeScaler_h__
 
 
-#include <TLorentzVector.h>
-
+#include "Rtypes.h"
 #include "GTree.h"
 
 
@@ -12,11 +11,11 @@
 class  GTreeScaler : public GTree
 {
 private:
-    Int_t		EventNumber;
-    Int_t		EventID;
-    UInt_t		Scaler[GTreeScaler_MAX];
+    Int_t		eventNumber;
+    Int_t		eventID;
+    UInt_t		scalers[GTreeScaler_MAX];
 
-    Int_t		NScaler;
+    Int_t		nScalers;
 
 protected:
     virtual void    SetBranchAdresses();
@@ -28,13 +27,13 @@ public:
 
     virtual void        Clear()     {}
             void        CloneValidEntries();
-            Int_t 		GetEventID()        		const	{return EventID;}
-            Int_t 		GetEventNumber()        	const	{return EventNumber;}
-            Int_t 		GetNScaler()    			const	{return NScaler;}
-    const	UInt_t*		GetScaler()                 const	{return	Scaler;}
-            UInt_t		GetScaler(const Int_t index)const	{return	Scaler[index];}
+            Int_t 		GetEventID()        		const	{return eventID;}
+            Int_t 		GetEventNumber()        	const	{return eventNumber;}
+            Int_t 		GetNScalers()    			const	{return nScalers;}
+    const	UInt_t*		GetScaler()                 const	{return	scalers;}
+            UInt_t		GetScaler(const Int_t index)const	{return	scalers[index];}
             UInt_t		GetScalerEntry(const Int_t event_number);
-            void 		SetNScaler(const Int_t num);
+            void 		SetNScalers(const Int_t num);
     virtual void        Print() const;
 };
 

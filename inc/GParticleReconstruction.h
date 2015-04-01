@@ -6,74 +6,59 @@
 
 #include "GDataChecks.h"
 
-#define	pdg_rootino 0
+#define	PDG_ROOTINO 0
 
 class	GParticleReconstruction : public GDataChecks
 {
 public:
-    enum ReconstructionType
+    enum ReconstructType
     {
-        ReconstructionType_AllPhotons,
-        ReconstructionType_AllProtons,
-        ReconstructionType_dEoverE
-    };
-    enum dEoverE_Type
-    {
-        dEoverE_Cut_None     = 0,
-        dEoverE_Cut_Proton   = 1,
-        dEoverE_Cut_PiPlus   = 2,
-        dEoverE_Cut_Electron = 4
+        ReconstructNone         = 0,
+        ReconstructCutProton    = 1,
+        ReconstructCutPion      = 2,
+        ReconstructCutElectron  = 4,
+        ReconstructTimeOfFlight = 8,
+        ReconstructClusterSize  = 16,
+        ReconstructAllPhotons   = 32,
+        ReconstructAllProtons   = 64
     };
 
 private:
 	std::string config;
 
-    ReconstructionType                 CB_type;
-    dEoverE_Type    CB_dEoverE_type;
-    ReconstructionType                 TAPS_type;
-    dEoverE_Type    TAPS_dEoverE_type;
+    ReconstructType   typeCB;
+    ReconstructType   typeTAPS;
 
-    char 		cutfilename[256];
-    char 		cutname[256];
+    TCutG* 		cutProtonCB;
+    TCutG* 		cutPionCB;
+    TCutG*		cutElectronCB;
+    TCutG* 		cutProtonTAPS;
+    TCutG* 		cutPionTAPS;
+    TCutG*		cutElectronTAPS;
 
-    TFile* 		CutFile;
-    TCutG* 		Cut;
-    TCutG* 		Cut_CB_proton;
-    TCutG* 		Cut_CB_pion;
-    TCutG*		Cut_CB_electron;
-    TCutG* 		Cut_TAPS_proton;
-    TCutG* 		Cut_TAPS_pion;
-    TCutG*		Cut_TAPS_electron;
+    TCutG* 		cutTimeOfFlightCB;
+    TCutG* 		cutClusterSizeCB;
+    TCutG* 		cutTimeOfFlightTAPS;
+    TCutG* 		cutClusterSizeTAPS;
 
-    Double_t	charged_theta_min;
-    Double_t	charged_theta_max;
+    Double_t	chargedThetaMin;
+    Double_t	chargedThetaMax;
 
-    Int_t		Cut_CB_proton_active;
-    Int_t		Cut_TAPS_proton_active;
-    Int_t 		Cut_proton_active;
+    Int_t* 		identified;
+    Int_t* 		charge;
+    Int_t* 		hadron;
 
-    Int_t		Cut_CB_pion_active;
-    Int_t		Cut_TAPS_pion_active;
-    Int_t 		Cut_pion_active;
+    Bool_t 		chargeIgnorePID;
+    Bool_t 		chargeIgnoreMWPC0;
+    Bool_t 		chargeIgnoreMWPC1;
+    Bool_t 		chargeIgnoreVETO;
 
-    Int_t		Cut_CB_electron_active;
-    Int_t		Cut_TAPS_electron_active;
-    Int_t 		Cut_electron_active;
+    Double_t    timeCutCB[2];
+    Double_t    timeCutTAPS[2];
 
-    Int_t* 		Identified;
-    Int_t* 		Charge;
-    
-    Bool_t 		charge_ignore_PID;
-    Bool_t 		charge_ignore_WC0;
-    Bool_t 		charge_ignore_WC1;
-    Bool_t 		charge_ignore_VETO;    
-
-    Double_t    CBTimeCut[2];
-    Double_t    TAPSTimeCut[2];
-
-    Bool_t      DoScalerCorrection;
-    Bool_t      DoTrigger;
-    Double_t    E_Sum;
+    Bool_t      doScalerCorrection;
+    Bool_t      doTrigger;
+    Double_t    energySum;
     Int_t       multiplicity;
 
     TCutG*	OpenCutFile(Char_t* filename, Char_t* cutname);
@@ -89,21 +74,11 @@ public:
     virtual ~GParticleReconstruction();
 
     Bool_t	Init();
-    void    SetCBTimeCut(const Double_t min, const Double_t max)    {CBTimeCut[0]=min; CBTimeCut[1]=max;}
-    void    SetTAPSTimeCut(const Double_t min, const Double_t max)  {TAPSTimeCut[0]=min; TAPSTimeCut[1]=max;}
-    void    SetScalerCorrection(const Bool_t value)                 {DoScalerCorrection = value;}
-    void    SetTrigger(const Double_t esum, const Int_t mult)       {DoTrigger = kTRUE; E_Sum = esum; multiplicity = mult;}
-    void    SetCBType(const ReconstructionType type, const dEoverE_Type dEoverE_type = dEoverE_Cut_None)    {CB_type = type; CB_dEoverE_type = dEoverE_type;}
-    void    SetTAPSType(const ReconstructionType type, const dEoverE_Type dEoverE_type = dEoverE_Cut_None)  {TAPS_type = type; TAPS_dEoverE_type = dEoverE_type;}
-    void    SetThetaRangeChargedParticles(const Double_t min, const Double_t max)  {charged_theta_min = min; charged_theta_max = max;}
-
-    //void	CheckNeutrality();
-    //void 	PhotonReconstruction();
-    void 	ChargedReconstructionCB(const Int_t index);
-    void 	ChargedReconstructionTAPS(const Int_t index);
-    void 	MesonReconstruction();
-    //void	AddParticle(Int_t pdg_code, Int_t nindex, Int_t index_list[]);
-    //void	AddParticle(Int_t pdg_code, Int_t i)                    {Int_t index_list[1]; index_list[0] = i; AddParticle(pdg_code, 1, index_list);}
+    void    SetCBTimeCut(const Double_t min, const Double_t max)    {timeCutCB[0]=min; timeCutCB[1]=max;}
+    void    SetTAPSTimeCut(const Double_t min, const Double_t max)  {timeCutTAPS[0]=min; timeCutTAPS[1]=max;}
+    void    SetScalerCorrection(const Bool_t value)                 {doScalerCorrection = value;}
+    void    SetTrigger(const Double_t esum, const Int_t mult)       {doTrigger = kTRUE; energySum = esum; multiplicity = mult;}
+    void    SetThetaRangeChargedParticles(const Double_t min, const Double_t max)  {chargedThetaMin = min; chargedThetaMax = max;}
 };
 
 #endif

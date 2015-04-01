@@ -11,48 +11,63 @@ using namespace std;
 GTreeManager::GTreeManager()    :
     GHistManager(),
     GConfigFile(),
-    file_in(0),
-    file_out(0),
+    inputFile(0),
+    outputFile(0),
     treeList(),
     treeCorreleatedToScalerReadList(),
     readList(),
     readCorreleatedToScalerReadList(),
     writeList(),
     countReconstructed(0),
-    rawEvent(0),
+    tracks(0),
     tagger(0),
     trigger(0),
     scalers(0),
     detectorHits(0),
+    setupParameters(0),
     rootinos(0),
     photons(0),
     electrons(0),
-    chargedPi(0),
+    chargedPions(0),
     protons(0),
     neutrons(0),
-    pi0(0),
-    eta(0),
-    etap(0),
-    linpol(0)
+    neutralPions(0),
+    etas(0),
+    etaPrimes(0),
+#ifdef hasPluto
+    linpol(0),
+    pluto(NULL),
+#else
+    linpol(0),
+#endif
+    geant(NULL)
+
 {
     pdgDB = TDatabasePDG::Instance();
 
-    etap = new GTreeMeson(this, TString(pdgDB->GetParticle("eta'")->GetName()));
-    eta = new GTreeMeson(this, TString(pdgDB->GetParticle("eta")->GetName()));
-    pi0 = new GTreeMeson(this, TString(pdgDB->GetParticle("pi0")->GetName()));
-    rootinos = new GTreeParticle(this, TString("rootino"));
-    photons = new GTreeParticle(this, TString(pdgDB->GetParticle("gamma")->GetName()));
-    electrons = new GTreeParticle(this, TString(pdgDB->GetParticle("e-")->GetName()));
-    chargedPi = new GTreeParticle(this, TString(pdgDB->GetParticle("pi+")->GetName()));
-    protons = new GTreeParticle(this, TString(pdgDB->GetParticle("proton")->GetName()));
-    neutrons = new GTreeParticle(this, TString(pdgDB->GetParticle("neutron")->GetName()));
+    rootinos = new GTreeParticle(this, "rootinos");
+    photons = new GTreeParticle(this, "photons");
+    electrons = new GTreeParticle(this, "electrons");
+    chargedPions = new GTreeParticle(this, "chargedPions");
+    protons = new GTreeParticle(this, "protons");
+    neutrons = new GTreeParticle(this, "neutrons");
+
+    neutralPions = new GTreeMeson(this, "neutralPions");
+    etas = new GTreeMeson(this, "etas");
+    etaPrimes = new GTreeMeson(this, "etaPrimes");
+
+    setupParameters = new GTreeSetupParameters(this);
     eventParameters = new GTreeEventParameters(this);
     detectorHits = new GTreeDetectorHits(this);
-    rawEvent = new GTreeRawEvent(this);
+    tracks = new GTreeTrack(this, "tracks");
     tagger = new GTreeTagger(this);
     trigger = new GTreeTrigger(this);
     scalers = new GTreeScaler(this);
     linpol = new GTreeLinPol(this);
+#ifdef hasPluto
+    pluto = new GTreePluto(this);
+#endif
+    geant = new GTreeA2Geant(this);
 }
 
 GTreeManager::~GTreeManager()
@@ -66,12 +81,12 @@ GTreeManager::~GTreeManager()
 
 Bool_t  GTreeManager::TraverseEntries(const UInt_t min, const UInt_t max)
 {
-    if(!file_in)
+    if(!inputFile)
         return kFALSE;
 
     for(UInt_t i=min; i<max; i++)
     {
-        for(int l=0; l<readList.GetEntriesFast(); l++)
+        for(Int_t l=0; l<readList.GetEntriesFast(); l++)
             ((GTree*)readList[l])->GetEntryFast(i);
 
         eventParameters->SetEventNumber(i);
@@ -84,7 +99,7 @@ Bool_t  GTreeManager::TraverseEntries(const UInt_t min, const UInt_t max)
 
 Bool_t  GTreeManager::TraverseScalerEntries(const UInt_t min, const UInt_t max)
 {
-    if(!file_in)
+    if(!inputFile)
         return kFALSE;
 
     if(!scalers)
@@ -93,7 +108,7 @@ Bool_t  GTreeManager::TraverseScalerEntries(const UInt_t min, const UInt_t max)
     {
         if(!scalers->OpenForInput())
         {
-            std::cout << "Can not open treeScaler in input file." << std::endl;
+            std::cout << "Can not open Scaler tree in input file." << std::endl;
             return kFALSE;
         }
     }
@@ -109,38 +124,56 @@ Bool_t  GTreeManager::TraverseScalerEntries(const UInt_t min, const UInt_t max)
 }
 
 
-Bool_t  GTreeManager::StartFile(const char* input_filename, const char* output_filename)
+Bool_t  GTreeManager::TraverseFiles()
 {
-    if(file_in)    file_in->Close();
-    file_in = TFile::Open(input_filename);
-    if(!file_in)
+    Int_t nFiles = GetNFiles();
+    for(Int_t i=0; i<nFiles; i++)
     {
-        cout << "#ERROR: Can not open input file " << input_filename << "!" << endl;
+        std::string inputFileName = GetInputFile(i);
+        std::string outputFileName = GetOutputFile(i);
+        if(!StartFile(inputFileName.c_str(), outputFileName.c_str())) cout << "ERROR: Failed on file " << inputFileName << "!" << endl;
+    }
+
+    return kTRUE;
+}
+
+Bool_t  GTreeManager::StartFile(const char* inputFileName, const char* outputFileName)
+{
+    if(inputFile)    inputFile->Close();
+    inputFile = TFile::Open(inputFileName);
+    if(!inputFile)
+    {
+        cout << "#ERROR: Can not open input file " << inputFileName << "!" << endl;
         return kFALSE;
     }
-    cout << "Opened input file " << file_in->GetName() << "!" << file_in->GetTitle() << endl;
+    cout << "Opened input file " << inputFile->GetName() << "!" << inputFile->GetTitle() << endl;
 
-    for(int l=0; l<treeList.GetEntries(); l++)
+    for(Int_t l=0; l<treeList.GetEntries(); l++)
     {
-        if(file_in->Get(((GTree*)treeList[l])->GetName()))
+        if(inputFile->Get(((GTree*)treeList[l])->GetName()))
             ((GTree*)treeList[l])->OpenForInput();
     }
-    for(int l=0; l<treeCorreleatedToScalerReadList.GetEntries(); l++)
+    for(Int_t l=0; l<treeCorreleatedToScalerReadList.GetEntries(); l++)
     {
-        if(file_in->Get(((GTree*)treeCorreleatedToScalerReadList[l])->GetName()))
+        if(inputFile->Get(((GTree*)treeCorreleatedToScalerReadList[l])->GetName()))
             ((GTree*)treeCorreleatedToScalerReadList[l])->OpenForInput();
     }
-
-    if(file_out)
-        delete file_out;
-    file_out = TFile::Open(output_filename, "RECREATE");
-    if(!file_out)
+    for(Int_t l=0; l<treeSingleReadList.GetEntries(); l++)
     {
-        cout << "#ERROR: Can not create output file " << output_filename << "!" << endl;
+        if(inputFile->Get(((GTree*)treeSingleReadList[l])->GetName()))
+            ((GTree*)treeSingleReadList[l])->OpenForInput();
+    }
+
+    if(outputFile)
+        outputFile->Close();
+    outputFile = TFile::Open(outputFileName, "RECREATE");
+    if(!outputFile)
+    {
+        cout << "#ERROR: Can not create output file " << outputFileName << "!" << endl;
         return kFALSE;
     }
-    cout << "Created output file " << file_out->GetName() << "!" << file_out->GetTitle() << endl;
-    TFileCacheWrite*    cache   = new TFileCacheWrite(file_out, 104857600);
+    cout << "Created output file " << outputFile->GetName() << "!" << outputFile->GetTitle() << endl;
+    TFileCacheWrite*    cache   = new TFileCacheWrite(outputFile, 104857600);
 
     isWritten   = kFALSE;
     ClearLinkedHistograms();
@@ -152,14 +185,16 @@ Bool_t  GTreeManager::StartFile(const char* input_filename, const char* output_f
         Write();
     cache->Flush();
 
-    /*for(int l=0; l<treeList.GetEntries(); l++)
+    for(Int_t l=0; l<treeList.GetEntries(); l++)
         ((GTree*)treeList[l])->Close();
-    for(int l=0; l<treeCorreleatedToScalerReadList.GetEntries(); l++)
-        ((GTree*)treeCorreleatedToScalerReadList[l])->Close();*/
+    for(Int_t l=0; l<treeCorreleatedToScalerReadList.GetEntries(); l++)
+        ((GTree*)treeCorreleatedToScalerReadList[l])->Close();
+    for(Int_t l=0; l<treeSingleReadList.GetEntries(); l++)
+        ((GTree*)treeSingleReadList[l])->Close();
 
 
-    //if(file_in)    file_in->Close();
-    //if(file_out)    file_out->Close();
+    if(inputFile)     inputFile->Close();
+    if(outputFile)    outputFile->Close();
     //delete  cache;
 
     return kTRUE;
@@ -167,13 +202,21 @@ Bool_t  GTreeManager::StartFile(const char* input_filename, const char* output_f
 
 Bool_t  GTreeManager::Write()
 {
-    if(!file_out)   return kFALSE;
-    file_out->cd();
+    if(!outputFile)   return kFALSE;
+    outputFile->cd();
 
-    for(int l=0; l<writeList.GetEntries(); l++)
+    for(Int_t l=0; l<writeList.GetEntries(); l++)
         ((GTree*)writeList[l])->Write();
 
-    WriteLinkedHistograms(file_out);
+    TIter objectIterator(gROOT->GetList());
+    TObject *object;
+    while((object=(TObject*)objectIterator()))
+    {
+        object->Write();
+        std::cout << "object " << object->GetName() << " has been written to disk." << std::endl;
+    }
+
+    WriteLinkedHistograms(outputFile);
 
     isWritten   = kTRUE;
 
@@ -182,8 +225,8 @@ Bool_t  GTreeManager::Write()
 
 Bool_t  GTreeManager::Write(const TNamed* object)
 {
-    if(!file_out)   return kFALSE;
-    file_out->cd();
+    if(!outputFile)   return kFALSE;
+    outputFile->cd();
     object->Write();
     std::cout << "object " << object->GetName() << " has been written to disk." << std::endl;
     return kTRUE;
@@ -192,16 +235,23 @@ Bool_t  GTreeManager::Write(const TNamed* object)
 
 Bool_t  GTreeManager::TraverseValidEvents_AcquTreeFile()
 {
+    for(Int_t l=0; l<readSingleReadList.GetEntriesFast(); l++)
+    {
+        ((GTree*)readSingleReadList[l])->GetEntryFast(0);
+        ((GTree*)readSingleReadList[l])->Fill();
+        if(!tagger->HasEnergy()) tagger->SetCalibration(setupParameters->GetNTagger(),setupParameters->GetTaggerPhotonEnergy());
+    }
+
     if(!scalers->IsOpenForInput())
     {
-        cout << "No treeScaler available. Expect MC data. Loop over all events" << endl;
+        cout << "No Scaler tree available. Expect MC data. Loop over all events" << endl;
         cout << "\tProcess events from " << 0 << " to " << GetNEntries() << "."<< endl;
         TraverseEntries(0, GetNEntries());
         return true;
     }
     if(scalers->GetNEntries()==0)
     {
-        cout << "No treeScaler available. Expect MC data. Loop over all events" << endl;
+        cout << "No Scaler tree available. Expect MC data. Loop over all events" << endl;
         cout << "\tProcess events from " << 0 << " to " << GetNEntries() << "."<< endl;
         TraverseEntries(0, GetNEntries());
         return true;
@@ -214,19 +264,19 @@ Bool_t  GTreeManager::TraverseValidEvents_AcquTreeFile()
     }
 
     // find correct shift
-    int shift;
+    Int_t shift;
     {
-        double shiftMean = 0;
-        for(int l=1; l<scalers->GetNEntries(); l++)
+        Double_t shiftMean = 0;
+        for(Int_t l=1; l<scalers->GetNEntries(); l++)
         {
             scalers->GetEntryFast(l);
             shiftMean    += scalers->GetEventNumber() - scalers->GetEventID();
         }
         shiftMean   /= scalers->GetNEntries()-1;
-        int bestIndex = 0;
+        Int_t bestIndex = 0;
         scalers->GetEntryFast(0);
-        double smallestDifference = shiftMean - (scalers->GetEventNumber() - scalers->GetEventID());
-        for(int l=1; l<scalers->GetNEntries(); l++)
+        Double_t smallestDifference = shiftMean - (scalers->GetEventNumber() - scalers->GetEventID());
+        for(Int_t l=1; l<scalers->GetNEntries(); l++)
         {
             scalers->GetEntryFast(l);
             if((shiftMean - (scalers->GetEventNumber() - scalers->GetEventID())) < smallestDifference)
@@ -239,19 +289,19 @@ Bool_t  GTreeManager::TraverseValidEvents_AcquTreeFile()
         shift   = scalers->GetEventNumber() - scalers->GetEventID();
     }
 
-    file_out->cd();
+    outputFile->cd();
     TH1I*   accepted    = new TH1I("CountScalerValid", "Events with correct scalers (all=0,accepted=1,rejected=2)", 3, 0, 3);
     accepted->SetBinContent(1, GetNEntries());
 
     scalers->GetEntry(scalers->GetNEntries()-1);
-    int start = scalers->GetEventNumber();
+    Int_t start = scalers->GetEventNumber();
     scalers->GetEntry(0);
     cout << "Checking scaler reads! Valid events from " << scalers->GetEventNumber() << " to " << start << endl;
     start = scalers->GetEventNumber();
 
-    for(int i=1; i<GetNScalerEntries(); i++)
+    for(Int_t i=1; i<GetNScalerEntries(); i++)
     {
-        for(int l=0; l<readCorreleatedToScalerReadList.GetEntriesFast(); l++)
+        for(Int_t l=0; l<readCorreleatedToScalerReadList.GetEntriesFast(); l++)
             ((GTree*)readCorreleatedToScalerReadList[l])->GetEntry(i);
         if(scalers->GetEventNumber() - scalers->GetEventID() == shift)
         {
@@ -259,7 +309,7 @@ Bool_t  GTreeManager::TraverseValidEvents_AcquTreeFile()
             accepted->SetBinContent(2, accepted->GetBinContent(2) + (scalers->GetEventNumber()-start));
             TraverseEntries(start, scalers->GetEventNumber());
             ProcessScalerRead();
-            for(int l=0; l<readCorreleatedToScalerReadList.GetEntriesFast(); l++)
+            for(Int_t l=0; l<readCorreleatedToScalerReadList.GetEntriesFast(); l++)
                 ((GTree*)readCorreleatedToScalerReadList[l])->Fill();
             start = scalers->GetEventNumber();
         }
@@ -275,16 +325,22 @@ Bool_t  GTreeManager::TraverseValidEvents_AcquTreeFile()
 
 Bool_t  GTreeManager::TraverseValidEvents_GoATTreeFile()
 {
+    for(Int_t l=0; l<readSingleReadList.GetEntriesFast(); l++)
+    {
+        ((GTree*)readSingleReadList[l])->GetEntryFast(0);
+        if(!tagger->HasEnergy()) tagger->SetCalibration(setupParameters->GetNTagger(),setupParameters->GetTaggerPhotonEnergy());
+    }
+
     if(!scalers->IsOpenForInput())
     {
-        cout << "No treeScaler available. Expect MC data. Loop over all events" << endl;
+        cout << "No Scaler tree available. Expect MC data. Loop over all events" << endl;
         cout << "\tProcess events from " << 0 << " to " << GetNEntries() << "."<< endl;
         TraverseEntries(0, GetNEntries());
         return true;
     }
     if(scalers->GetNEntries()==0)
     {
-        cout << "No treeScaler available. Expect MC data. Loop over all events" << endl;
+        cout << "No Scaler tree available. Expect MC data. Loop over all events" << endl;
         cout << "\tProcess events from " << 0 << " to " << GetNEntries() << "."<< endl;
         TraverseEntries(0, GetNEntries());
         return true;
@@ -293,21 +349,21 @@ Bool_t  GTreeManager::TraverseValidEvents_GoATTreeFile()
     Int_t   event       = 0;
     Int_t   start       = 0;
     Int_t   maxEvent    = GetNEntries();
-    for(int l=0; l<readList.GetEntriesFast(); l++)
+    for(Int_t l=0; l<readList.GetEntriesFast(); l++)
         ((GTree*)readList[l])->GetEntryFast(event);
 
     cout << GetNScalerEntries() << " scaler reads. " << maxEvent << " events." << endl;
 
-    for(int i=0; i<GetNScalerEntries(); i++)
+    for(Int_t i=0; i<GetNScalerEntries(); i++)
     {
-        for(int l=0; l<readCorreleatedToScalerReadList.GetEntriesFast(); l++)
+        for(Int_t l=0; l<readCorreleatedToScalerReadList.GetEntriesFast(); l++)
             ((GTree*)readCorreleatedToScalerReadList[l])->GetEntry(i);
         while(eventParameters->GetEventNumber()<scalers->GetEventNumber())
         {
             event++;
             if(event>=maxEvent)
                 break;
-            for(int l=0; l<readList.GetEntriesFast(); l++)
+            for(Int_t l=0; l<readList.GetEntriesFast(); l++)
                 ((GTree*)readList[l])->GetEntryFast(event);
             ProcessEvent();
         }
@@ -326,7 +382,7 @@ Bool_t  GTreeManager::TraverseValidEvents_GoATTreeFile()
 
 UInt_t  GTreeManager::GetNEntries()       const
 {
-    for(int l=1; l<readList.GetEntriesFast(); l++)
+    for(Int_t l=1; l<readList.GetEntriesFast(); l++)
     {
         if(((GTree*)readList[l])->GetNEntries() != ((GTree*)readList[l-1])->GetNEntries())
         {
@@ -343,7 +399,7 @@ UInt_t  GTreeManager::GetNEntries()       const
 
 UInt_t  GTreeManager::GetNScalerEntries()       const
 {
-    for(int l=1; l<readCorreleatedToScalerReadList.GetEntriesFast(); l++)
+    for(Int_t l=1; l<readCorreleatedToScalerReadList.GetEntriesFast(); l++)
     {
         if(((GTree*)readCorreleatedToScalerReadList[l])->GetNEntries() != ((GTree*)readCorreleatedToScalerReadList[l-1])->GetNEntries())
         {
@@ -360,7 +416,7 @@ UInt_t  GTreeManager::GetNScalerEntries()       const
 
 void    GTreeManager::SetAsGoATFile()
 {
-    if(!file_out)
+    if(!outputFile)
         return;
     TNamed flag("GoAT_File", "GoAT_File");
     Write(&flag);
@@ -368,7 +424,7 @@ void    GTreeManager::SetAsGoATFile()
 
 void    GTreeManager::SetAsPhysicsFile()
 {
-    if(!file_out)
+    if(!outputFile)
         return;
     TNamed flag("Physics_File", "Physics_File");
     Write(&flag);
@@ -385,9 +441,9 @@ Bool_t  GTreeManager::IsAcquFile()    const
 
 Bool_t  GTreeManager::IsGoATFile()    const
 {
-    if(!file_in)
+    if(!inputFile)
         return kFALSE;
-    TNamed* flag    = (TNamed*)file_in->Get("GoAT_File");
+    TNamed* flag    = (TNamed*)inputFile->Get("GoAT_File");
     if(flag)
         return kTRUE;
     return kFALSE;
@@ -395,9 +451,9 @@ Bool_t  GTreeManager::IsGoATFile()    const
 
 Bool_t  GTreeManager::IsPhysicsFile()    const
 {
-    if(!file_in)
+    if(!inputFile)
         return kFALSE;
-    TNamed* flag    = (TNamed*)file_in->Get("Physics_File");
+    TNamed* flag    = (TNamed*)inputFile->Get("Physics_File");
     if(flag)
         return kTRUE;
     return kFALSE;

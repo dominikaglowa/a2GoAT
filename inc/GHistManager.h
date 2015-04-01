@@ -71,7 +71,7 @@ public:
     GHistWriteList()    {}
     ~GHistWriteList();
 
-            void    AddHistogram(TH1D* _Hist, const TString& _Name);
+            void    AddHistogram(TH1* _Hist, const TString& _Name);
     GHistWriteList* GetDirectory(const TString& _Name);
     virtual void    Print();
     virtual Int_t	Write(const char* NotUsed = 0, Int_t option = 0, Int_t bufsize = 0);
@@ -86,7 +86,7 @@ private:
     Bool_t      isDirectory;
 
 public:
-    GHistWriteListEntry(TH1D* _Hist, const TString& _Name)                              : obj(_Hist), name(_Name), isDirectory(kFALSE)   {}
+    GHistWriteListEntry(TH1* _Hist, const TString& _Name)                              : obj(_Hist), name(_Name), isDirectory(kFALSE)   {}
     GHistWriteListEntry(const TString& _Name);
     ~GHistWriteListEntry();
 

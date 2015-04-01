@@ -129,7 +129,7 @@ GHistWriteListEntry*    GHistWriteList::AddDirectory(const TString& _Name)
     return entry;
 }
 
-void    GHistWriteList::AddHistogram(TH1D* _Hist, const TString& _Name)
+void    GHistWriteList::AddHistogram(TH1 *_Hist, const TString& _Name)
 {
     if(!_Hist)
         return;

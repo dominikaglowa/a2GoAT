@@ -5,12 +5,13 @@
 using namespace std;
 
 
-GTree::GTree(GTreeManager *Manager, const TString& _Name, const Bool_t CorrelatedToScalerRead)    :
+GTree::GTree(GTreeManager *Manager, const TString& _Name, const Bool_t CorrelatedToScalerRead, const Bool_t SingleRead)    :
     name(_Name),
     correlatedToScalerRead(CorrelatedToScalerRead),
+    singleRead(SingleRead),
     status(FLAG_CLOSED),
-    tree_in(0),
-    tree_out(0),
+    inputTree(0),
+    outputTree(0),
     manager(Manager),
     saveToFile(true)
 {
@@ -18,6 +19,11 @@ GTree::GTree(GTreeManager *Manager, const TString& _Name, const Bool_t Correlate
     {
         if(!manager->treeCorreleatedToScalerReadList.FindObject(this))
             manager->treeCorreleatedToScalerReadList.Add(this);
+    }
+    else if(singleRead)
+    {
+        if(!manager->treeSingleReadList.FindObject(this))
+            manager->treeSingleReadList.Add(this);
     }
     else
     {
@@ -34,6 +40,14 @@ GTree::~GTree()
         {
             manager->treeCorreleatedToScalerReadList.Remove(this);
             manager->treeCorreleatedToScalerReadList.Compress();
+        }
+    }
+    else if(singleRead)
+    {
+        if(manager->treeSingleReadList.FindObject(this))
+        {
+            manager->treeSingleReadList.Remove(this);
+            manager->treeSingleReadList.Compress();
         }
     }
     else
@@ -56,13 +70,13 @@ void    GTree::Fill()
             return;
         }
     }
-    tree_out->Fill();
+    outputTree->Fill();
 }
 
 Bool_t  GTree::OpenForInput()
 {
-    manager->file_in->GetObject(name.Data(),tree_in);
-    if(tree_in)
+    manager->inputFile->GetObject(name.Data(),inputTree);
+    if(inputTree)
     {
         SetBranchAdresses();
         status  = status | FLAG_OPENFORINPUT;
@@ -72,6 +86,11 @@ Bool_t  GTree::OpenForInput()
             if(!manager->readCorreleatedToScalerReadList.FindObject(this))
                 manager->readCorreleatedToScalerReadList.Add(this);
         }
+        else if(singleRead)
+        {
+            if(!manager->readSingleReadList.FindObject(this))
+                manager->readSingleReadList.Add(this);
+        }
         else
         {
             if(!manager->readList.FindObject(this))
@@ -80,16 +99,16 @@ Bool_t  GTree::OpenForInput()
         return kTRUE;
     }
 
-    cout << "#ERROR# GTree::OpenForInput(TFile& inputFile): could not find a tree called " << name.Data() << " in input file " << manager->file_in->GetName() << "!" << endl;
+    cout << "#ERROR# " << __PRETTY_FUNCTION__ << ": could not find a tree called " << name.Data() << " in input file " << manager->inputFile->GetName() << "!" << endl;
     status = status & (~FLAG_OPENFORINPUT);
     return kFALSE;
 }
 
 Bool_t  GTree::OpenForOutput()
 {
-    manager->file_out->cd();
-    tree_out    = new TTree(name.Data(), name.Data());
-    if(tree_out)
+    manager->outputFile->cd();
+    outputTree    = new TTree(name.Data(), name.Data());
+    if(outputTree)
     {
         SetBranches();
         status  = status | FLAG_OPENFOROUTPUT;
@@ -98,7 +117,7 @@ Bool_t  GTree::OpenForOutput()
         return kTRUE;
     }
 
-    cout << "#ERROR# GTree::OpenForInput(TFile& inputFile): can not create output tree " << name.Data() << " in output file " << manager->file_in->GetName() << "!" << endl;
+    cout << "#ERROR# " << __PRETTY_FUNCTION__ << ": can not create output tree " << name.Data() << " in output file " << manager->inputFile->GetName() << "!" << endl;
     status = status & (~FLAG_OPENFOROUTPUT);
     return kFALSE;
 }
@@ -116,12 +135,12 @@ void    GTree::Close()
         manager->readList.Remove(this);
         manager->readList.Compress();
     }
-    if(tree_out)
-        delete tree_out;
+    if(outputTree)
+        delete outputTree;
 
     if(!saveToFile)
     {
-        manager->file_out->Delete(TString(name).Append(";*").Data());
+        manager->outputFile->Delete(TString(name).Append(";*").Data());
         saveToFile  = true;
     }
 }
@@ -131,8 +150,8 @@ void    GTree::CloseForInput()
     status = status & ~FLAG_OPENFORINPUT;
     if(manager->readList.FindObject(this))
         manager->readList.Remove(this);
-    if(tree_in)
-        delete tree_in;
+    if(inputTree)
+        delete inputTree;
 }
 
 void    GTree::CloseForOutput()
@@ -140,8 +159,8 @@ void    GTree::CloseForOutput()
     status = status & ~FLAG_OPENFOROUTPUT;
     if(manager->writeList.FindObject(this))
         manager->writeList.Remove(this);
-    if(tree_out)
-        delete tree_out;
+    if(outputTree)
+        delete outputTree;
 }
 
 void    GTree::Print() const
@@ -158,13 +177,13 @@ void    GTree::Print() const
 
 Bool_t	GTree::Write()
 {
-    if(!manager->file_out)          return kFALSE;
-    if(!tree_out)                   return kFALSE;
+    if(!manager->outputFile)          return kFALSE;
+    if(!outputTree)                   return kFALSE;
     if(!IsOpenForOutput())          return kFALSE;
 
-    manager->file_out->cd();
-    tree_out->Write();
-    std::cout << "tree" << name << " has been written to disk." << std::endl;
+    manager->outputFile->cd();
+    outputTree->Write();
+    std::cout << "tree " << name << " has been written to disk." << std::endl;
     return kTRUE;
 }
 

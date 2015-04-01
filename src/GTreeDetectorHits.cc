@@ -3,12 +3,12 @@
 
 
 GTreeDetectorHits::GTreeDetectorHits(GTreeManager *Manager)    :
-    GTree(Manager, TString("treeDetectorHits")),
-    nNaI_Hits(0),
-    nPID_Hits(0),
-    nWC_Hits(0),
-    nBaF2_PbWO4_Hits(0),
-    nVeto_Hits(0)
+    GTree(Manager, TString("detectorHits")),
+    nNaIHits(0),
+    nPIDHits(0),
+    nMWPCHits(0),
+    nBaF2Hits(0),
+    nVetoHits(0)
 {
 }
 
@@ -18,34 +18,34 @@ GTreeDetectorHits::~GTreeDetectorHits()
 
 void    GTreeDetectorHits::SetBranchAdresses()
 {
-    tree_in->SetBranchAddress("nNaI_Hits", &nNaI_Hits);
-    tree_in->SetBranchAddress("NaI_Hits", NaI_Hits);
-    tree_in->SetBranchAddress("NaI_Cluster", NaI_Cluster);
-    tree_in->SetBranchAddress("nPID_Hits", &nPID_Hits);
-    tree_in->SetBranchAddress("PID_Hits", PID_Hits);
-    tree_in->SetBranchAddress("nWC_Hits", &nWC_Hits);
-    tree_in->SetBranchAddress("WC_Hits", WC_Hits);
-    tree_in->SetBranchAddress("nBaF2_PbWO4_Hits", &nBaF2_PbWO4_Hits);
-    tree_in->SetBranchAddress("BaF2_PbWO4_Hits", BaF2_PbWO4_Hits);
-    tree_in->SetBranchAddress("BaF2_PbWO4_Cluster", BaF2_PbWO4_Cluster);
-    tree_in->SetBranchAddress("nVeto_Hits", &nVeto_Hits);
-    tree_in->SetBranchAddress("Veto_Hits", Veto_Hits);
+    inputTree->SetBranchAddress("nNaIHits", &nNaIHits);
+    inputTree->SetBranchAddress("NaIHits", NaIHits);
+    inputTree->SetBranchAddress("NaICluster", NaICluster);
+    inputTree->SetBranchAddress("nPIDHits", &nPIDHits);
+    inputTree->SetBranchAddress("PIDHits", PIDHits);
+    inputTree->SetBranchAddress("nMWPCHits", &nMWPCHits);
+    inputTree->SetBranchAddress("MWPCHits", MWPCHits);
+    inputTree->SetBranchAddress("nBaF2Hits", &nBaF2Hits);
+    inputTree->SetBranchAddress("BaF2Hits", BaF2Hits);
+    inputTree->SetBranchAddress("BaF2Cluster", BaF2Cluster);
+    inputTree->SetBranchAddress("nVetoHits", &nVetoHits);
+    inputTree->SetBranchAddress("VetoHits", VetoHits);
 }
 
 void    GTreeDetectorHits::SetBranches()
 {
-    tree_out->Branch("nNaI_Hits", &nNaI_Hits, "nNaI_Hits/I");
-    tree_out->Branch("NaI_Hits", NaI_Hits, "NaI_Hits[nNaI_Hits]/I");
-    tree_out->Branch("NaI_Cluster", NaI_Cluster, "NaI_Cluster[nNaI_Hits]/I");
-    tree_out->Branch("nPID_Hits", &nPID_Hits, "nPID_Hits/I");
-    tree_out->Branch("PID_Hits", PID_Hits, "PID_Hits[nPID_Hits]/I");
-    tree_out->Branch("nWC_Hits", &nWC_Hits, "nWC_Hits/I");
-    tree_out->Branch("WC_Hits", WC_Hits, "WC_Hits[nWC_Hits]/I");
-    tree_out->Branch("nBaF2_PbWO4_Hits", &nBaF2_PbWO4_Hits, "nBaF2_PbWO4_Hits/I");
-    tree_out->Branch("BaF2_PbWO4_Hits", BaF2_PbWO4_Hits, "BaF2_PbWO4_Hits[nBaF2_PbWO4_Hits]/I");
-    tree_out->Branch("BaF2_PbWO4_Cluster", BaF2_PbWO4_Cluster, "BaF2_PbWO4_Cluster[nBaF2_PbWO4_Hits]/I");
-    tree_out->Branch("nVeto_Hits", &nVeto_Hits, "nVeto_Hits/I");
-    tree_out->Branch("Veto_Hits", Veto_Hits, "Veto_Hits[nVeto_Hits]/I");
+    outputTree->Branch("nNaIHits", &nNaIHits, "nNaIHits/I");
+    outputTree->Branch("NaIHits", NaIHits, "NaIHits[nNaIHits]/I");
+    outputTree->Branch("NaICluster", NaICluster, "NaICluster[nNaIHits]/I");
+    outputTree->Branch("nPIDHits", &nPIDHits, "nPIDHits/I");
+    outputTree->Branch("PIDHits", PIDHits, "PIDHits[nPIDHits]/I");
+    outputTree->Branch("nMWPCHits", &nMWPCHits, "nMWPCHits/I");
+    outputTree->Branch("MWPCHits", MWPCHits, "MWPCHits[nMWPCHits]/I");
+    outputTree->Branch("nBaF2Hits", &nBaF2Hits, "nBaF2Hits/I");
+    outputTree->Branch("BaF2Hits", BaF2Hits, "BaF2Hits[nBaF2Hits]/I");
+    outputTree->Branch("BaF2Cluster", BaF2Cluster, "BaF2Cluster[nBaF2Hits]/I");
+    outputTree->Branch("nVetoHits", &nVetoHits, "nVetoHits/I");
+    outputTree->Branch("VetoHits", VetoHits, "VetoHits[nVetoHits]/I");
 }
 
 

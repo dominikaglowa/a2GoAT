@@ -34,8 +34,8 @@ Cut-IM-Width-Eta-Prime: 60
 
 # Sort on number of raw particle tracks (total, CB, and TAPS)
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#					Total 	CB		TAPS
-SortRaw-NParticles: 3-		0+		0+
+#		     Total 	CB		TAPS
+SortRaw-NTracks:     3-		0+		0+
 
 
 # Sort on Trigger conditions (Crystal Ball Energy Sum)
@@ -47,9 +47,9 @@ SortRaw-CBEnergySum: 	90+
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Sort-NParticles: 	1+
 
-				Type 	Number	Theta-min 	Theta-max
-Sort-Particle:	pi0		1=		0			180
-#Sort-Particle:	charged	1= 		0			20
+		Type		Number	Theta-min 	Theta-max
+Sort-Particle:	neutralPions	1=	0		180
+#Sort-Particle:	charged		1= 	0		20
 
 # Note: (I'll put this here while we don't have a manual)
 # the charged and neutral particle cuts are additional 

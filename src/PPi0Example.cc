@@ -15,23 +15,16 @@ PPi0Example::PPi0Example()
     MM_2g	= new GH1("MM_2g", 	"MM_2g", 	400,   800, 1200);
 
     TaggerAccScal = new TH1D("TaggerAccScal","TaggerAccScal",352,0,352);
-    //stuff from the old file
-    MMom		= new GH1("MMom", 	"MMom;q(fm^{-1})", 	 	400, 0., 2.0);     
-    MMom_2g	= new GH1("MMom_2g", 	"MMom_2g;q(fm^{-1})", 	400,   0, 2.0);
-    MMomD		= new GH1("MMomD", 	"MMom;q(fm^{-1})", 	 	400, 0., 2.0);     
-    MMomD_2g	= new GH1("MMomD_2g", 	"MMom_2g;q(fm^{-1})", 	400,   0, 2.0); 
-    //
 }
 
 PPi0Example::~PPi0Example()
 {
 }
 
-Bool_t	PPi0Example::Init(const char* configfile)
+Bool_t	PPi0Example::Init()
 {
 	cout << "Initialising physics analysis..." << endl;
 	cout << "--------------------------------------------------" << endl << endl;
-	if(configfile) SetConfigFile(configfile);
 
 	if(!InitBackgroundCuts()) return kFALSE;
 	if(!InitTargetMass()) return kFALSE;
@@ -58,34 +51,30 @@ Bool_t	PPi0Example::Start()
 void	PPi0Example::ProcessEvent()
 {
 	// fill time diff (tagger - pi0), all pi0
-	FillTime(*pi0,time);
-	FillTimeCut(*pi0,time_cut);
+    FillTime(*GetNeutralPions(),time);
+    FillTimeCut(*GetNeutralPions(),time_cut);
 	
 	// fill missing mass, all pi0
-	FillMissingMass(*pi0,MM);	
+    FillMissingMass(*GetNeutralPions(),MM);
 	
 	// fill invariant mass, all pi0
-	FillMass(*pi0,IM);
-
-   //stuff from the old file
-	// fill missing momentum, all pi0
-	FillMissingMomentum(*pi0,MMom);
-	//	
+    FillMass(*GetNeutralPions(),IM);
+		
     // Some neutral decays
-    for (Int_t i = 0; i < pi0->GetNParticles(); i++)
+    for (Int_t i = 0; i < GetNeutralPions()->GetNParticles(); i++)
     {
         // Fill MM for 2 photon decay
-        if ((pi0->GetNSubParticles(i) == 2) & (pi0->GetNSubPhotons(i) == 2))
+        if ((GetNeutralPions()->GetNSubParticles(i) == 2) & (GetNeutralPions()->GetNSubPhotons(i) == 2))
         {
 		// fill time diff (tagger - pi0), this pi0
-		FillTime(*pi0,i,time_2g);
-		FillTimeCut(*pi0,i,time_2g_cut);
+        FillTime(*GetNeutralPions(),i,time_2g);
+        FillTimeCut(*GetNeutralPions(),i,time_2g_cut);
 			
 		// fill missing mass, this pi0
-            	FillMissingMass(*pi0,i,MM_2g);
+                FillMissingMass(*GetNeutralPions(),i,MM_2g);
             
 		// fill invariant mass, this pi0
-            FillMass(*pi0,i,IM_2g);
+            FillMass(*GetNeutralPions(),i,IM_2g);
         }
 
     }
@@ -100,9 +89,6 @@ void	PPi0Example::ProcessScalerRead()
 
 Bool_t	PPi0Example::Write()
 {
-	// Write some TH1s
-	GTreeManager::Write(TaggerAccScal);
-
-	// Write all GH1's easily
+    // Write all GH1's and TObjects defined in this class
 	GTreeManager::Write();
 }

@@ -28,13 +28,14 @@ public:
 private:
     TString         name;
     Bool_t          correlatedToScalerRead;
+    Bool_t          singleRead;
     Int_t           status;
 
-    void    GetEntryFast(const UInt_t index)    {tree_in->GetEntry(index);}
+    void    GetEntryFast(const UInt_t index)    {inputTree->GetEntry(index);}
 
 protected:
-    TTree*          tree_in;
-    TTree*          tree_out;
+    TTree*          inputTree;
+    TTree*          outputTree;
     GTreeManager*   manager;
     bool            saveToFile;
 
@@ -42,7 +43,7 @@ protected:
     virtual void    SetBranches() = 0;
 
 public:
-    GTree(GTreeManager* Manager, const TString& _Name, const Bool_t CorrelatedToScalerRead = kFALSE);
+    GTree(GTreeManager* Manager, const TString& _Name, const Bool_t CorrelatedToScalerRead = kFALSE, const Bool_t SingleRead = kFALSE);
     virtual ~GTree();
 
     virtual void        Clear() = 0;
@@ -52,7 +53,7 @@ public:
             void        Fill();
     inline  Bool_t      GetEntry(const UInt_t index);
     const   char*       GetName() const {return name.Data();}
-            UInt_t      GetNEntries()   { if(IsOpenForInput()) return tree_in->GetEntries(); return 0;}
+            UInt_t      GetNEntries()   { if(IsOpenForInput()) return inputTree->GetEntries(); return 0;}
             Bool_t      IsClosed()          {return !status;}
             Bool_t      IsOpenForInput()    {return status & FLAG_OPENFORINPUT;}
             Bool_t      IsOpenForOutput()   {return status & FLAG_OPENFOROUTPUT;}
@@ -65,9 +66,9 @@ public:
 
 Bool_t  GTree::GetEntry(const UInt_t index)
 {
-    if(index > tree_in->GetEntries())
+    if(index > inputTree->GetEntries())
         return kFALSE;
-    tree_in->GetEntry(index);
+    inputTree->GetEntry(index);
 }
 
 

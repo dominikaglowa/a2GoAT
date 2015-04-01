@@ -64,31 +64,31 @@ void DrawCluster(TString sData, Int_t iMinEvn=0, Int_t iMinPart=0, Int_t iMinNaI
   }
 
   TFile fData(sData,"READ");
-  TTree *tData = (TTree*)fData.Get("treeDetectorHits");
+  TTree *tData = (TTree*)fData.Get("detectorHits");
 
-  Int_t iNNaI_Hits;
-  Int_t* iNaI_Hits;
-  Int_t* iNaI_Cluster;
+  Int_t iNNaIHits;
+  Int_t* iNaIHits;
+  Int_t* iNaICluster;
 
-  iNaI_Hits = new Int_t[720];
-  iNaI_Cluster = new Int_t[720];
+  iNaIHits = new Int_t[720];
+  iNaICluster = new Int_t[720];
 
-  tData->SetBranchAddress("nNaI_Hits",&iNNaI_Hits);
-  tData->SetBranchAddress("NaI_Hits",iNaI_Hits);
-  tData->SetBranchAddress("NaI_Cluster",iNaI_Cluster);
+  tData->SetBranchAddress("nNaIHits",&iNNaIHits);
+  tData->SetBranchAddress("NaIHits",iNaIHits);
+  tData->SetBranchAddress("NaICluster",iNaICluster);
 
-  Int_t iNBaF_Hits;
-  Int_t* iBaF_Hits;
-  Int_t* iBaF_Cluster;
+  Int_t iNBaFHits;
+  Int_t* iBaFHits;
+  Int_t* iBaFCluster;
 
-  iBaF_Hits = new Int_t[720];
-  iBaF_Cluster = new Int_t[720];
+  iBaFHits = new Int_t[720];
+  iBaFCluster = new Int_t[720];
 
-  tData->SetBranchAddress("nBaF2_PbWO4_Hits",&iNBaF_Hits);
-  tData->SetBranchAddress("BaF2_PbWO4_Hits",iBaF_Hits);
-  tData->SetBranchAddress("BaF2_PbWO4_Cluster",iBaF_Cluster);
+  tData->SetBranchAddress("nBaF2Hits",&iNBaFHits);
+  tData->SetBranchAddress("BaF2Hits",iBaFHits);
+  tData->SetBranchAddress("BaF2Cluster",iBaFCluster);
 
-  TTree *tEvent = (TTree*)fData.Get("treeRawEvent");
+  TTree *tEvent = (TTree*)fData.Get("tracks");
 
   Int_t iNParticles;
   UChar_t* iClusterSize;
@@ -99,7 +99,7 @@ void DrawCluster(TString sData, Int_t iMinEvn=0, Int_t iMinPart=0, Int_t iMinNaI
 
   tEvent->SetBranchAddress("nParticles",&iNParticles);
   tEvent->SetBranchAddress("clusterSize",iClusterSize);
-  tEvent->SetBranchAddress("Apparatus",iApparatus);
+  tEvent->SetBranchAddress("apparatus",iApparatus);
 
   Bool_t bPart = true;
   Bool_t bNaI = true;
@@ -126,22 +126,22 @@ void DrawCluster(TString sData, Int_t iMinEvn=0, Int_t iMinPart=0, Int_t iMinNaI
   tData->GetEvent(iEvnN);
 
   j=-1;
-  for(i=0; i<iNNaI_Hits; i++){
-    if(iNaI_Cluster[i] > j) j = iNaI_Cluster[i];
+  for(i=0; i<iNNaIHits; i++){
+    if(iNaICluster[i] > j) j = iNaICluster[i];
   }
-  const Int_t iNNaI_Cluster = j+1;
+  const Int_t iNNaICluster = j+1;
 
   j=-1;
-  for(i=0; i<iNBaF_Hits; i++){
-    if(iBaF_Cluster[i] > j) j = iBaF_Cluster[i];
+  for(i=0; i<iNBaFHits; i++){
+    if(iBaFCluster[i] > j) j = iBaFCluster[i];
   }
-  const Int_t iNBaF_Cluster = j+1;
+  const Int_t iNBaFCluster = j+1;
 
-  cout << iNNaI_Cluster << " NaI Clusters, " << iNBaF_Cluster << " BaF Clusters" << endl;
+  cout << iNNaICluster << " NaI Clusters, " << iNBaFCluster << " BaF Clusters" << endl;
 
   gROOT->cd();
 
-  const Int_t iNData = iNNaI_Cluster+iNBaF_Cluster+1;
+  const Int_t iNData = iNNaICluster+iNBaFCluster+1;
   Int_t iDataN;
 
   TGraph *gData[iNData];
@@ -169,21 +169,21 @@ void DrawCluster(TString sData, Int_t iMinEvn=0, Int_t iMinPart=0, Int_t iMinNaI
   }
 
   cout << endl << "NaI" << endl << endl;
-  for(Int_t i=0; i<iNNaI_Hits; i++){
-    cout << i << "\t" << iNaI_Hits[i] << "\t" << iNaI_Cluster[i] << "\t" << dNaIX[iNaI_Hits[i]] << "\t" << dNaIY[iNaI_Hits[i]] << "\t" << dNaIZ[iNaI_Hits[i]] << endl;
-    iDataN = iNaI_Cluster[i]+1;
-    gData[iDataN]->SetPoint(gData[iDataN]->GetN(),dNaITh[iNaI_Hits[i]],dNaIPh[iNaI_Hits[i]]);
-    gData3[iDataN]->SetPoint(gData3[iDataN]->GetN(),dNaIX[iNaI_Hits[i]],dNaIY[iNaI_Hits[i]],dNaIZ[iNaI_Hits[i]]);
+  for(Int_t i=0; i<iNNaIHits; i++){
+    cout << i << "\t" << iNaIHits[i] << "\t" << iNaICluster[i] << "\t" << dNaIX[iNaIHits[i]] << "\t" << dNaIY[iNaIHits[i]] << "\t" << dNaIZ[iNaIHits[i]] << endl;
+    iDataN = iNaICluster[i]+1;
+    gData[iDataN]->SetPoint(gData[iDataN]->GetN(),dNaITh[iNaIHits[i]],dNaIPh[iNaIHits[i]]);
+    gData3[iDataN]->SetPoint(gData3[iDataN]->GetN(),dNaIX[iNaIHits[i]],dNaIY[iNaIHits[i]],dNaIZ[iNaIHits[i]]);
   }
   cout << endl << "BaF" << endl << endl;
-  for(Int_t i=0; i<iNBaF_Hits; i++){
-    cout << i << "\t" << iBaF_Hits[i] << "\t" << iBaF_Cluster[i] << "\t" << dBaFX[iBaF_Hits[i]] << "\t" << dBaFY[iBaF_Hits[i]] << "\t" << dBaFZ[iBaF_Hits[i]] << "\t" << iBaF_Cluster[i]+iNNaI_Cluster+1 << endl;
-    if(iBaF_Cluster[i] < 0) iDataN = 0;
-    else iDataN = iBaF_Cluster[i]+iNNaI_Cluster+1;
-    gData[iDataN]->SetPoint(gData[iDataN]->GetN(),dBaFTh[iBaF_Hits[i]],dBaFPh[iBaF_Hits[i]]);
-    gData2[iDataN]->SetPoint(gData2[iDataN]->GetN(),dBaFX[iBaF_Hits[i]],dBaFY[iBaF_Hits[i]]);
-    gData3[iDataN]->SetPoint(gData3[iDataN]->GetN(),dBaFX[iBaF_Hits[i]],dBaFY[iBaF_Hits[i]],dBaFZ[iBaF_Hits[i]]);
-    gBox2->SetPoint(iBaF_Hits[i],-100,0);
+  for(Int_t i=0; i<iNBaFHits; i++){
+    cout << i << "\t" << iBaFHits[i] << "\t" << iBaFCluster[i] << "\t" << dBaFX[iBaFHits[i]] << "\t" << dBaFY[iBaFHits[i]] << "\t" << dBaFZ[iBaFHits[i]] << "\t" << iBaFCluster[i]+iNNaICluster+1 << endl;
+    if(iBaFCluster[i] < 0) iDataN = 0;
+    else iDataN = iBaFCluster[i]+iNNaICluster+1;
+    gData[iDataN]->SetPoint(gData[iDataN]->GetN(),dBaFTh[iBaFHits[i]],dBaFPh[iBaFHits[i]]);
+    gData2[iDataN]->SetPoint(gData2[iDataN]->GetN(),dBaFX[iBaFHits[i]],dBaFY[iBaFHits[i]]);
+    gData3[iDataN]->SetPoint(gData3[iDataN]->GetN(),dBaFX[iBaFHits[i]],dBaFY[iBaFHits[i]],dBaFZ[iBaFHits[i]]);
+    gBox2->SetPoint(iBaFHits[i],-100,0);
   }
 
   if(gROOT->FindObject("c1")) delete (TCanvas*)gROOT->FindObject("c1");
