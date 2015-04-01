@@ -1,5 +1,5 @@
-#ifndef __PPhysics_h__
-#define __PPhysics_h__
+#ifndef __PPhysicsTin_h__
+#define __PPhysicsTin_h__
 
 #include <iostream>
 #include <fstream>
@@ -11,7 +11,7 @@
 #include "GConfigFile.h"
 
 
-class	PPhysics : virtual public GTreeManager
+class	PPhysicsTin : virtual public GTreeManager
 {
 private:
 
@@ -39,30 +39,18 @@ private:
 
 	Int_t TC_scaler_min;
 	Int_t TC_scaler_max;
-
-    Int_t LT_scaler_clock;
-    Int_t LT_scaler_inhib;
-    Int_t LT_scaler_tginh;
-
-    TObjArray *scalerHists;
-    std::vector<Int_t> nScalerSets;
-    std::vector<Int_t> scalerChanL;
-    std::vector<Int_t> scalerChanH;
-    Int_t nScalerHists;
-
-    Bool_t IsDecodeDoubles;
+	
 	
 protected:
 
 
 public:
-    PPhysics();
-    virtual ~PPhysics();
+    PPhysicsTin();
+    virtual ~PPhysicsTin();
 
     virtual Bool_t	Init();
 	virtual void	Analyse() {;}
 	virtual void	Reconstruct();
-    virtual void	ProcessScalerRead();
     virtual Bool_t	Write();
 
 	void	FillMissingMass(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning = kFALSE);
@@ -93,16 +81,28 @@ public:
 
 	void 	SetTC_scalers(Int_t sc_min, Int_t sc_max) { TC_scaler_min = sc_min; TC_scaler_max = sc_max; }
 	Int_t 	GetTC_scaler_min() { return TC_scaler_min;}
-    Int_t 	GetTC_scaler_max() { return TC_scaler_max;}
+	Int_t 	GetTC_scaler_max() { return TC_scaler_max;}	
 
-    void 	SetLT_scalers(Int_t clock, Int_t inhib, Int_t tginh=0) { LT_scaler_clock = clock; LT_scaler_inhib = inhib; LT_scaler_tginh = tginh; }
-    Int_t 	GetLT_scaler_clock() { return LT_scaler_clock;}
-    Int_t 	GetLT_scaler_inhib() { return LT_scaler_inhib;}
-    Int_t 	GetLT_scaler_tginh() { return LT_scaler_tginh;}
+	//my added histograms
+	void	FillMissingMomentum(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void	FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void 	FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
 
-    void 	SetDecodeDoubles(Int_t decode) { IsDecodeDoubles = (Bool_t)decode; }
-    Bool_t 	GetDecodeDoubles() { return IsDecodeDoubles;}
+	Double_t CalcMissingMomentum(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
+	void	FillMissingMomentumD(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void	FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void 	FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void FillDeltaE(const GTreeMeson& tree, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void FillDeltaE(const GTreeMeson& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void FillDeltaE(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	/* void FillDeltaE_Missmom(const GTreeMeson& tree, TH2F** gHist, Bool_t TaggerBinning = kFALSE); */
+	/* void FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, GH2** gHist, Bool_t TaggerBinning = kFALSE); */
+	/* void FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index, GH2** gHist, Bool_t TaggerBinning = kFALSE); */
+	Double_t CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
 
+	Double_t CalcMissingMomentumD(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
+
+	//
 	// TH1 routines
 	void FillMissingMass(const GTreeParticle& tree, TH1* Hprompt, TH1* Hrandom);
 	void FillMissingMass(const GTreeParticle& tree, Int_t particle_index, TH1* Hprompt, TH1* Hrandom);
@@ -119,26 +119,19 @@ public:
 	void FillBeamAsymmetry(const GTreeParticle& tree, Int_t particle_index, TH1* Hprompt, TH1* Hrandom, Double_t MM_min, Double_t MM_max);
 	void FillBeamAsymmetry(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, TH1* Hprompt, TH1* Hrandom, Double_t MM_min, Double_t MM_max);
 
+	/* //my histogram array */
+	/* void FillDeltaE_Missmom(const GTreeMeson& tree, TH2F** Hprompt, TH2F** Hrandom); */
+	/* void FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, TH2F** Hprompt, TH2F** Hrandom); */
+	/* void FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index, TH2F** Hprompt, TH2F** Hrandom); */
+	//
+
 	Double_t CalcCoplanarity(const GTreeParticle& tree1, Int_t particle_index1, const GTreeParticle& tree2, Int_t particle_index2);
 
-    void AddScalerHist(const char* name, Int_t lo, Int_t hi);
-    void AddScalerHist(const char* name, Int_t scal, const char* label);
-    void FillScalers(Int_t low_scaler_number, Int_t high_scaler_number, TH1* hist, Int_t first_bin=1);
-    void GoosyTagger(TH1* hist);
-    void GoosyVuprom(TH1* hist);
-
-    TH1D* GetScalerHist(Int_t index) {return (TH1D*)scalerHists->At(index);}
-    TH1D* GetScalerHist(const char* name) {return (TH1D*)scalerHists->At(scalerHists->IndexOf(scalerHists->FindObject(name)));}
+	void FillScalers(Int_t low_scaler_number, Int_t high_scaler_number, TH1* hist);
 
 	Bool_t InitBackgroundCuts();
 	Bool_t InitTargetMass();
 	Bool_t InitTaggerChannelCuts();
 	Bool_t InitTaggerScalers();
-    Bool_t InitLiveTimeScalers();
-    Bool_t InitDisplayScalers();
-    Bool_t InitDecodeDoubles();
-
-    Bool_t  RejectTagged(Int_t tagger_index);
-    Bool_t  RejectDouble(Int_t tagger_index);
 };
 #endif

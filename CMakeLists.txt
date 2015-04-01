@@ -143,6 +143,15 @@ add_executable(TaggEff
    )
 target_link_libraries(TaggEff goatbase ghist ${LIBS} ${ROOT_LIBRARIES})
 
+add_executable(tin-pi0-physics
+   inc/PPhysicsTin.h
+   src/PPhysicsTin.cc
+   inc/PTinPi0Physics.h
+   src/PTinPi0Physics.cc
+   src/tin_pi0-physics_main.cc
+   )
+target_link_libraries(tin-pi0-physics goatbase ghist ${LIBS} ${ROOT_LIBRARIES})
+
 # install some scripts to the bin directory
 # by creating symlinks
 file(GLOB CORE_EXTRA_SCRIPTS "scripts/*")

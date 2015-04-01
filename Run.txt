@@ -1,0 +1,1 @@
+./build/bin/tin-pi0-physics -d ./ -D ./ configfiles/Physics-Pi0.dat

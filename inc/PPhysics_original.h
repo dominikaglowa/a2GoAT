@@ -39,18 +39,7 @@ private:
 
 	Int_t TC_scaler_min;
 	Int_t TC_scaler_max;
-
-    Int_t LT_scaler_clock;
-    Int_t LT_scaler_inhib;
-    Int_t LT_scaler_tginh;
-
-    TObjArray *scalerHists;
-    std::vector<Int_t> nScalerSets;
-    std::vector<Int_t> scalerChanL;
-    std::vector<Int_t> scalerChanH;
-    Int_t nScalerHists;
-
-    Bool_t IsDecodeDoubles;
+	
 	
 protected:
 
@@ -62,7 +51,6 @@ public:
     virtual Bool_t	Init();
 	virtual void	Analyse() {;}
 	virtual void	Reconstruct();
-    virtual void	ProcessScalerRead();
     virtual Bool_t	Write();
 
 	void	FillMissingMass(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning = kFALSE);
@@ -93,15 +81,7 @@ public:
 
 	void 	SetTC_scalers(Int_t sc_min, Int_t sc_max) { TC_scaler_min = sc_min; TC_scaler_max = sc_max; }
 	Int_t 	GetTC_scaler_min() { return TC_scaler_min;}
-    Int_t 	GetTC_scaler_max() { return TC_scaler_max;}
-
-    void 	SetLT_scalers(Int_t clock, Int_t inhib, Int_t tginh=0) { LT_scaler_clock = clock; LT_scaler_inhib = inhib; LT_scaler_tginh = tginh; }
-    Int_t 	GetLT_scaler_clock() { return LT_scaler_clock;}
-    Int_t 	GetLT_scaler_inhib() { return LT_scaler_inhib;}
-    Int_t 	GetLT_scaler_tginh() { return LT_scaler_tginh;}
-
-    void 	SetDecodeDoubles(Int_t decode) { IsDecodeDoubles = (Bool_t)decode; }
-    Bool_t 	GetDecodeDoubles() { return IsDecodeDoubles;}
+	Int_t 	GetTC_scaler_max() { return TC_scaler_max;}	
 
 	// TH1 routines
 	void FillMissingMass(const GTreeParticle& tree, TH1* Hprompt, TH1* Hrandom);
@@ -121,24 +101,11 @@ public:
 
 	Double_t CalcCoplanarity(const GTreeParticle& tree1, Int_t particle_index1, const GTreeParticle& tree2, Int_t particle_index2);
 
-    void AddScalerHist(const char* name, Int_t lo, Int_t hi);
-    void AddScalerHist(const char* name, Int_t scal, const char* label);
-    void FillScalers(Int_t low_scaler_number, Int_t high_scaler_number, TH1* hist, Int_t first_bin=1);
-    void GoosyTagger(TH1* hist);
-    void GoosyVuprom(TH1* hist);
-
-    TH1D* GetScalerHist(Int_t index) {return (TH1D*)scalerHists->At(index);}
-    TH1D* GetScalerHist(const char* name) {return (TH1D*)scalerHists->At(scalerHists->IndexOf(scalerHists->FindObject(name)));}
+	void FillScalers(Int_t low_scaler_number, Int_t high_scaler_number, TH1* hist);
 
 	Bool_t InitBackgroundCuts();
 	Bool_t InitTargetMass();
 	Bool_t InitTaggerChannelCuts();
 	Bool_t InitTaggerScalers();
-    Bool_t InitLiveTimeScalers();
-    Bool_t InitDisplayScalers();
-    Bool_t InitDecodeDoubles();
-
-    Bool_t  RejectTagged(Int_t tagger_index);
-    Bool_t  RejectDouble(Int_t tagger_index);
 };
 #endif

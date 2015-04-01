@@ -14,12 +14,6 @@ PPi0Example::PPi0Example()
     MM		= new GH1("MM", 	"MM", 	 	400,   800, 1200);     
     MM_2g	= new GH1("MM_2g", 	"MM_2g", 	400,   800, 1200);
 
-    //stuff from the old file
-    MMom		= new GH1("MMom", 	"MMom;q(fm^{-1})", 	 	400, 0., 2.0);     
-    MMom_2g	= new GH1("MMom_2g", 	"MMom_2g;q(fm^{-1})", 	400,   0, 2.0);
-    MMomD		= new GH1("MMomD", 	"MMom;q(fm^{-1})", 	 	400, 0., 2.0);     
-    MMomD_2g	= new GH1("MMomD_2g", 	"MMom_2g;q(fm^{-1})", 	400,   0, 2.0); 
-    //
 }
 
 PPi0Example::~PPi0Example()
@@ -69,10 +63,6 @@ void	PPi0Example::ProcessEvent()
 	// fill invariant mass, all pi0
     FillMass(*GetNeutralPions(),IM);
 		
-   //stuff from the old file
-	// fill missing momentum, all pi0
-	FillMissingMomentum(*GetNeutralPions(),MMom);
-	//	
     // Some neutral decays
     for (Int_t i = 0; i < GetNeutralPions()->GetNParticles(); i++)
     {
