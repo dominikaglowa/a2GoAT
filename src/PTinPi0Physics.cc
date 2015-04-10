@@ -23,7 +23,11 @@ PTinPi0Physics::PTinPi0Physics()
     MMomD		= new GH1("MMomD", 	"MMom;q(fm^{-1})", 	 	400, 0., 2.0);     
     MMomD_2g	= new GH1("MMomD_2g", 	"MMom_2g;q(fm^{-1})", 	400,   0, 2.0);
 
- DeltaE_CM_D_2g	= new GH1("DeltaE_CM_D_2g", 	"DeltaE_{CM} 2 #gamma ; MeV", 	400, -60., 60.); 
+    DeltaE_CM_D_2g	= new GH1("DeltaE_CM_D_2g", 	"DeltaE_{CM} 2 #gamma ; MeV", 	400, -60., 60.); 
+    Test_histo_g1  =  new GH1("Test_histo_g1", "DeltaE_{CM} 2 #gamma ; MeV",   100, -60., 60.);
+    Test_histo_h1_prompt  =  new TH1F("Test_histo_h1_prompt", "Promp DeltaE_{CM} 2 #gamma ; MeV",   100, -60., 60.);
+    Test_histo_h1_random  =  new TH1F("Test_histo_h1_random", "Random DeltaE_{CM} 2 #gamma ; MeV",   100, -60., 60.);
+    
     // int bin_q=300;
     // int bin_e=23;
     // char Title[60];
@@ -44,6 +48,12 @@ PTinPi0Physics::PTinPi0Physics()
     char Title2[160];
     for (int j=0; j<bin_e; j++) {
       
+      // sprintf(Title,"pimissen_pr_DE_E_%d",j);
+      // sprintf(Title2,"DeltaE_{CM} 2 #gamma for E_{bin}=%i; DeltaE_{CM}(MeV); q(fm^{-1})",j);
+      // DeltaE_Missmom_BeamE[j] = new GH2(Title,Title2,100,-60.0,60.0,300,0.0,1.5,352);
+
+
+
       sprintf(Title,"pimissen_pr_DE_E_%d",j);
       sprintf(Title2,"Prompt DeltaE_{CM} 2 #gamma for E_{bin}=%i; DeltaE_{CM}(MeV); q(fm^{-1})",j);
       DeltaE_Missmom_BeamE_Prompt[j] = new TH2F(Title,Title2,100,-60,60,300,0.0,1.5);
@@ -51,6 +61,8 @@ PTinPi0Physics::PTinPi0Physics()
       sprintf(Title,"pimissen_r_DE_E_%d",j);
       sprintf(Title2,"random DeltaE_{CM} 2 #gamma for E_{bin}=%i; DeltaE_{CM}(MeV); q(fm^{-1})",j);
       DeltaE_Missmom_BeamE_Random[j] = new TH2F(Title,Title2,100,-60,60,300,0.0,1.5);
+
+
       // for (int i=0; i<bin_q; i++) {
       // 	sprintf(Title,"pimissen_%i,pr_DE_E_%d",i,j);
       // 	sprintf(Title2,"Prompt DeltaE_{CM} 2 #gamma for E_{bin}=%i e mom_{bin}=%i; DeltaE_{CM}(MeV)",j,i);
@@ -231,8 +243,16 @@ void PTinPi0Physics::FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_i
       //     DeltaE_Missmom_BeamE_Prompt[Ebin]->Fill(DeltaE,q);
       // gHist[qbin*nEbin+Ebin]->Fill(DeltaE,time);
       //      cout << "DeltaE=" << DeltaE << "  q=" << q << "  time=" << time << " IsPrompt=" << GHistBGSub::IsPrompt(time) << " IsRandom=" << GHistBGSub::IsRandom(time) << endl; 
-      if (GHistBGSub::IsPrompt(time)) DeltaE_Missmom_BeamE_Prompt[Ebin]->Fill(DeltaE,q);
-      if (GHistBGSub::IsRandom(time)) DeltaE_Missmom_BeamE_Random[Ebin]->Fill(DeltaE,q);
+
+      //      DeltaE_Missmom_BeamE[Ebin]->Fill(DeltaE,q,time);
+      if (GHistBGSub::IsPrompt(time)) {
+	DeltaE_Missmom_BeamE_Prompt[Ebin]->Fill(DeltaE,q);
+	Test_histo_h1_prompt->Fill(DeltaE);
+      }
+      if (GHistBGSub::IsRandom(time)) {
+	DeltaE_Missmom_BeamE_Random[Ebin]->Fill(DeltaE,q);
+	Test_histo_h1_random->Fill(DeltaE);
+      }
     }
 
 
