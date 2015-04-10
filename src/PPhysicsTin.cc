@@ -4,8 +4,8 @@
 #include "PPhysicsTin.h"
 PPhysicsTin::PPhysicsTin() 
 {
-	TC_cut_min = 0;
-	TC_cut_max = 352;
+  TC_cut_min = 200; //tagger channel cut
+	TC_cut_max = 300;
 }
 
 PPhysicsTin::~PPhysicsTin()
@@ -521,7 +521,7 @@ Double_t PPhysicsTin::CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, 
     E2 = gamma2.E(); // photon 2 energy
     
     // cout << E1 << " " << gamma1.Px() << " " << E2 << " " << gamma2.Px() << endl;
-
+    if(E1>0 && E2>0){ // 10/04/15 - get some evebnts with only one photon ???/ needs checking
     Double_t beta = (beam.E()/(beam.E() + target.M())); 
     Double_t lorentz_gamma =  1/(sqrt(1 - beta*beta));
     Double_t Xform = (E1 - E2)/(E1 + E2);
@@ -534,6 +534,9 @@ Double_t PPhysicsTin::CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, 
     E_diff = lorentz_gamma*((sqrt(2*mpi0*mpi0/((1-Xform*Xform)*(1-cos(psi))))) 
 			    - ( beta*(E1*costheta1 + E2*costheta2)) ) 
       - ( (2*Egamma*M + mpi0*mpi0)/(2*sqrt(2*Egamma*M + M*M)) );
+    }
+
+    cout << "E1 " << E1 << "E2 " << E2 << "E_diff " << E_diff << "theta1 " << gamma1.Theta()*TMath::RadToDeg() << "theta2 " << gamma2.Theta()*TMath::RadToDeg() << endl;
   return E_diff;
   
 }

@@ -228,9 +228,10 @@ void PTinPi0Physics::FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_i
     if ( Ebin != -1 && qbin >0 && qbin< nqbin ) {
       DeltaE_CM_D_2g->Fill(DeltaE,time);
       //    cout << q << " " << DeltaE << " " << time << " " << Ebin << endl;
-      //     DeltaE_Missmom_BeamE_Prompt[Ebin]->Fill(DeltaE,q);
+     
+ //     DeltaE_Missmom_BeamE_Prompt[Ebin]->Fill(DeltaE,q);
       // gHist[qbin*nEbin+Ebin]->Fill(DeltaE,time);
-      //      cout << "DeltaE=" << DeltaE << "  q=" << q << "  time=" << time << " IsPrompt=" << GHistBGSub::IsPrompt(time) << " IsRandom=" << GHistBGSub::IsRandom(time) << endl; 
+      cout << "Ebin" << Ebin << "DeltaE=" << DeltaE << "  q=" << q << "  time=" << time << " IsPrompt=" << GHistBGSub::IsPrompt(time) << " IsRandom=" << GHistBGSub::IsRandom(time) << endl; 
       if (GHistBGSub::IsPrompt(time)) DeltaE_Missmom_BeamE_Prompt[Ebin]->Fill(DeltaE,q);
       if (GHistBGSub::IsRandom(time)) DeltaE_Missmom_BeamE_Random[Ebin]->Fill(DeltaE,q);
     }
