@@ -29,12 +29,13 @@ private:
     GH1*	MMomD;
     GH1*	MMomD_2g;
     GH1*	DeltaE_CM_D_2g;
-    //GH2*       DeltaE_Missmom_BeamE[23];
+    //    GH2*       DeltaE_Missmom_BeamE[23];
 
     TH2F*       DeltaE_Missmom_BeamE_Prompt[23];
     TH2F*       DeltaE_Missmom_BeamE_Random[23];
-    TH1F*       Test_histo[7000];
-
+    TH1F*       Test_histo_h1_prompt;
+    TH1F*       Test_histo_h1_random;
+    GH1*        Test_histo_g1;
 
     //
 
