@@ -4,8 +4,8 @@
 #include "PPhysicsTin.h"
 PPhysicsTin::PPhysicsTin() 
 {
-	TC_cut_min = 0;
-	TC_cut_max = 352;
+	TC_cut_min = 200;
+	TC_cut_max = 300;
 }
 
 PPhysicsTin::~PPhysicsTin()
