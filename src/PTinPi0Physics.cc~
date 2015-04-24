@@ -1,0 +1,116 @@
+#include "PTinPi0Physics.h"
+
+PTinPi0Physics::PTinPi0Physics()
+{ 
+    time 	= new GH1("time", 	"time", 	1400, -700, 700);
+    time_cut 	= new GH1("time_cut", 	"time_cut", 	1400, -700, 700);
+
+    time_2g 	= new GH1("time_2g",	"time_2g", 	1400, -700, 700);
+    time_2g_cut = new GH1("time_2g_cut","time_2g_cut", 	1400, -700, 700);
+
+    IM 		= new GH1("IM", 	"IM", 		400,   0, 400);
+    IM_2g 	= new GH1("IM_2g", 	"IM_2g", 	400,   0, 400);
+  
+    MM		= new GH1("MM", 	"MM", 	 	400,   107800, 108200);     
+    MM_2g	= new GH1("MM_2g", 	"MM_2g", 	400,  107800, 108200);
+
+    TaggerAccScal = new TH1D("TaggerAccScal","TaggerAccScal",352,0,352);
+
+    //my added histograms
+
+    MMom		= new GH1("MMom", 	"MMom;q(fm^{-1})", 	 	400, 0., 2.0);     
+    MMom_2g	= new GH1("MMom_2g", 	"MMom_2g;q(fm^{-1})", 	400,   0, 2.0);
+    MMomD		= new GH1("MMomD", 	"MMom;q(fm^{-1})", 	 	400, 0., 2.0);     
+    MMomD_2g	= new GH1("MMomD_2g", 	"MMom_2g;q(fm^{-1})", 	400,   0, 2.0);
+}
+
+PTinPi0Physics::~PTinPi0Physics()
+{
+}
+
+Bool_t	PTinPi0Physics::Init()
+{
+	cout << "Initialising physics analysis..." << endl;
+	cout << "--------------------------------------------------" << endl << endl;
+
+	if(!InitBackgroundCuts()) return kFALSE;
+	if(!InitTargetMass()) return kFALSE;
+	if(!InitTaggerChannelCuts()) return kFALSE;
+	if(!InitTaggerScalers()) return kFALSE;
+	cout << "--------------------------------------------------" << endl;
+	return kTRUE;
+}
+
+Bool_t	PTinPi0Physics::Start()
+{
+    if(!IsGoATFile())
+    {
+        cout << "ERROR: Input File is not a GoAT file." << endl;
+        return kFALSE;
+    }
+    SetAsPhysicsFile();
+
+    TraverseValidEvents();
+
+    return kTRUE;
+}
+
+void	PTinPi0Physics::ProcessEvent()
+{
+	// fill time diff (tagger - pi0), all pi0
+    FillTime(*GetNeutralPions(),time);
+    FillTimeCut(*GetNeutralPions(),time_cut);
+	
+	// fill missing mass, all pi0
+    FillMissingMass(*GetNeutralPions(),MM);
+	
+	// fill invariant mass, all pi0
+    FillMass(*GetNeutralPions(),IM);
+
+    //my added histograms
+	// fill missing momentum, all pi0
+    FillMissingMomentum(*GetNeutralPions(),MMom);
+	// fill missing momentum calculated using Dan routine, all pi0
+    FillMissingMomentumD(*getneutralPions(),MMomD);
+	//
+		
+    // Some neutral decays
+    for (Int_t i = 0; i < GetNeutralPions()->GetNParticles(); i++)
+    {
+        // Fill MM for 2 photon decay
+        if ((GetNeutralPions()->GetNSubParticles(i) == 2) & (GetNeutralPions()->GetNSubPhotons(i) == 2))
+        {
+		// fill time diff (tagger - pi0), this pi0
+        FillTime(*GetNeutralPions(),i,time_2g);
+        FillTimeCut(*GetNeutralPions(),i,time_2g_cut);
+			
+		// fill missing mass, this pi0
+                FillMissingMass(*GetNeutralPions(),i,MM_2g);
+            
+		// fill invariant mass, this pi0
+            FillMass(*GetNeutralPions(),i,IM_2g);
+    
+	    //my added histograms
+		// fill missing momentum, this pi0
+	    FillMissingMomentum(*GetNeutralPions(),i,MMom_2g);
+		// fill missing momentum calculated using Dan routine, this pi0
+	    FillMissingMomentumD(*GetNeutralPions(),i,MMomD_2g);
+		//
+
+        }
+
+    }
+
+}
+
+void	PTinPi0Physics::ProcessScalerRead()
+{
+	// Fill Tagger Scalers
+	FillScalers(GetTC_scaler_min(),GetTC_scaler_max(),TaggerAccScal);
+}
+
+Bool_t	PTinPi0Physics::Write()
+{
+    // Write all GH1's and TObjects defined in this class
+	GTreeManager::Write();
+}
