@@ -72,21 +72,24 @@ PTinPi0Physics::PTinPi0Physics()
 
       // }
     }
-    // int bin_q=300;
-    // int bin_e=23;
-    // char Title[60];
-    // char Title2[160];
-    // // for (int i=0; i<bin_q; i++) {
-    // for (int j=0; j<bin_e; j++) {
-    //   //	sprintf(Title,"pimissen_q_%d_%.3f_%.3f",j,i*0.005,(i*0.005+0.005)); //original q binning
-    //   sprintf(Title,"pimissen_E_%d",j); //rebin 4
-    // 	//sprintf(Title,"pimissen_q_%d_%.3f_%.3f",j,i*0.05,(i*0.05+0.05)); //rebin 10
-    //   sprintf(Title2,"DeltaE_{CM} 2 #gamma for E_{bin}=%i; DeltaE_{CM}(MeV); q (fm^{-1})",j);
-    //   DeltaE_Missmom_BeamE[j] =  new GH2(Title,Title2,100,-60,60,300,0.0,1.5,100,kFALSE);
-    // }
-      //}
-}
+   
 
+int bin_theta=180;
+int bin_en=23;
+    char Title3[60];
+    char Title4[160];
+    for (int j=0; j<bin_en; j++) {
+
+       sprintf(Title3,"pimissen_pr_DE_theta_E_%d",j);
+      sprintf(Title4,"Prompt DeltaE_{CM} 2 #gamma for E_{bin}=%i; DeltaE_{CM}(MeV); theta(deg)",j);
+      DeltaE_Thetapi0_BeamE_Prompt[j] = new TH2F(Title3,Title4,100,-60,60,180,0,180);
+
+      sprintf(Title3,"pimissen_r_DE_theta_E_%d",j);
+      sprintf(Title4,"random DeltaE_{CM} 2 #gamma for E_{bin}=%i; DeltaE_{CM}(MeV); theta(deg)",j);
+      DeltaE_Thetapi0_BeamE_Random[j] = new TH2F(Title3,Title4,100,-60,60,180,0,180);
+
+}
+}
 PTinPi0Physics::~PTinPi0Physics()
 {
 }
@@ -162,6 +165,7 @@ void	PTinPi0Physics::ProcessEvent()
             FillMass(*GetNeutralPions(),i,IM_2g);
 
       //my added histograms
+	    FillDeltaE_Thetapi0(*GetNeutralPions());
 
 	    FillDeltaE_Missmom(*GetNeutralPions());
 	    FillDeltaE(*GetNeutralPions(),i,DeltaE_CM_D_2g);
@@ -233,6 +237,7 @@ void PTinPi0Physics::FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_i
     Double_t E_beam=beam2.E();
     Double_t DeltaE=CalcDeltaED(tree,particle_index,tagger_index);
 
+    //cout << "HERE" << endl;
     for (int i=0; i<nEbin; i++) {
       if (E_beam >= Ebin_v[i] && E_beam<Ebin_v[i+1]) Ebin=i; 
     }
@@ -242,7 +247,7 @@ void PTinPi0Physics::FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_i
       //    cout << q << " " << DeltaE << " " << time << " " << Ebin << endl;
       //     DeltaE_Missmom_BeamE_Prompt[Ebin]->Fill(DeltaE,q);
       // gHist[qbin*nEbin+Ebin]->Fill(DeltaE,time);
-      //      cout << "DeltaE=" << DeltaE << "  q=" << q << "  time=" << time << " IsPrompt=" << GHistBGSub::IsPrompt(time) << " IsRandom=" << GHistBGSub::IsRandom(time) << endl; 
+      // cout << "DeltaE=" << DeltaE << "  q=" << q << "  time=" << time << " IsPrompt=" << GHistBGSub::IsPrompt(time) << " IsRandom=" << GHistBGSub::IsRandom(time) << endl; 
 
       //      DeltaE_Missmom_BeamE[Ebin]->Fill(DeltaE,q,time);
       if (GHistBGSub::IsPrompt(time)) {
@@ -258,5 +263,78 @@ void PTinPi0Physics::FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_i
 
 						
 }
+
+
+void PTinPi0Physics::FillDeltaE_Thetapi0(const GTreeMeson& tree)
+{
+    for (Int_t i = 0; i < tree.GetNParticles(); i++)
+    {
+    for (Int_t j = 0; j < GetTagger()->GetNTagged(); j++)
+	{
+	  	FillDeltaE_Thetapi0(tree, i, j);
+	}
+    }
+}
+
+void PTinPi0Physics::FillDeltaE_Thetapi0(const GTreeMeson& tree, Int_t particle_index)
+{
+    for (Int_t i = 0; i < GetTagger()->GetNTagged(); i++)
+	{
+	  	FillDeltaE_Thetapi0(tree, particle_index, i);
+	}
+}
+
+void PTinPi0Physics::FillDeltaE_Thetapi0(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index)
+{ 
+
+  Double_t time = GetTagger()->GetTaggedTime(tagger_index) - tree.GetTime(particle_index);
+  TLorentzVector beam2(0.,0.,GetTagger()->GetTaggedEnergy(tagger_index),GetTagger()->GetTaggedEnergy(tagger_index));  
+
+  double thetamin=0.0; //min and max in fm^-1
+  double thetamax=180;
+  int nthetabin = 180;
+  int thetabin;
+  int nEbin=23;
+  int Ebin=-1;
+  double Ebin_v[] = {135,140,145,150,160,170,180,190,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,580};
+  TLorentzVector particle	= tree.Particle(particle_index); 
+  Double_t theta=particle.Theta()*TMath::RadToDeg();
+  //cout<<theta<<endl;
+    Double_t E_beam=beam2.E();
+    Double_t DeltaE=CalcDeltaED(tree,particle_index,tagger_index);
+
+    //cout << "thetabin" << thetabin << endl;
+    //cout << "DeltaE" << DeltaE << endl;
+    //cout << "theta" << theta << endl;
+
+    for (int i=0; i<nEbin; i++) {
+      if (E_beam >= Ebin_v[i] && E_beam<Ebin_v[i+1]) Ebin=i; 
+    }
+    //qbin = int(TMath::Floor(q*50));
+    //    if ( Ebin != -1 && thetabin >0 && thetabin< nthetabin ) {
+     if ( Ebin != -1) {
+      //DeltaE_CM_D_2g->Fill(DeltaE,time);
+      //    cout << q << " " << DeltaE << " " << time << " " << Ebin << endl;
+      //     DeltaE_Missmom_BeamE_Prompt[Ebin]->Fill(DeltaE,q);
+      // gHist[qbin*nEbin+Ebin]->Fill(DeltaE,time);
+      //     cout << "DeltaE=" << DeltaE << "  theta=" << theta << "  time=" << time << " IsPrompt=" << GHistBGSub::IsPrompt(time) << " IsRandom=" << GHistBGSub::IsRandom(time) << endl; 
+
+      //      DeltaE_Missmom_BeamE[Ebin]->Fill(DeltaE,q,time);
+      if (GHistBGSub::IsPrompt(time)) {
+        
+    	DeltaE_Thetapi0_BeamE_Prompt[Ebin]->Fill(DeltaE,theta);
+    	//Test_histo_h1_prompt->Fill(DeltaE);
+      }
+      if (GHistBGSub::IsRandom(time)) {
+    	DeltaE_Thetapi0_BeamE_Random[Ebin]->Fill(DeltaE,theta);
+    	//Test_histo_h1_random->Fill(DeltaE);
+      }
+      //cout << "DeltaE=" << DeltaE << "  theta=" << theta << "  time=" << time << " IsPrompt=" << GHistBGSub::IsPrompt(time) << " IsRandom=" << GHistBGSub::IsRandom(time) << endl; 
+    }
+    }
+
+
+						
+
 //
 

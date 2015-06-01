@@ -36,6 +36,10 @@ private:
     TH1F*       Test_histo_h1_prompt;
     TH1F*       Test_histo_h1_random;
     GH1*        Test_histo_g1;
+    
+    TH2F*       DeltaE_Thetapi0_BeamE_Prompt[23];
+    TH2F*       DeltaE_Thetapi0_BeamE_Random[23];
+
 
     //
 
@@ -54,6 +58,11 @@ public:
     void FillDeltaE_Missmom(const GTreeMeson& tree);
     void FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index);
     void FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
+    
+    void FillDeltaE_Thetapi0(const GTreeMeson& tree);
+    void FillDeltaE_Thetapi0(const GTreeMeson& tree, Int_t particle_index);
+    void FillDeltaE_Thetapi0(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
+
 	//
 
 
