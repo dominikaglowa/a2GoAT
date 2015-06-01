@@ -75,3 +75,5 @@ Sort-Particle:	neutralPions	1=	0		180
 #-----------------------------------------------------------------------
 # Activate physics analysis?
 #-----------------------------------------------------------------------
+#	position(cm) z-distance of TAPS
+#Target-Shift: -0.44  145.7
