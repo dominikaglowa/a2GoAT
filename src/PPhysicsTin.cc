@@ -528,12 +528,15 @@ Double_t PPhysicsTin::CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, 
     Double_t psi = gamma1.Vect().Angle(gamma2.Vect());
     Double_t costheta1 = gamma1.CosTheta();
     Double_t costheta2 = gamma2.CosTheta();
+    Double_t theta1 = gamma1.Theta()/TMath::Pi()*180;
+    Double_t theta2 = gamma2.Theta()/TMath::Pi()*180;
     Double_t mpi0 = 134.9766;
     Double_t M = target.M();
     Double_t Egamma=beam.E();
-    E_diff = lorentz_gamma*((sqrt(2*mpi0*mpi0/((1-Xform*Xform)*(1-cos(psi))))) 
+    if (theta1 > 25 && theta1<155 && theta2>25 &&theta2<155)	    E_diff = lorentz_gamma*((sqrt(2*mpi0*mpi0/((1-Xform*Xform)*(1-cos(psi))))) 
 			    - ( beta*(E1*costheta1 + E2*costheta2)) ) 
       - ( (2*Egamma*M + mpi0*mpi0)/(2*sqrt(2*Egamma*M + M*M)) );
+      else E_diff = 80.; // return a value out of our range for histrograms if the value is not in CrystalBall, also assuming 5 degrees for full acceptance of the photon
   return E_diff;
   
 }
