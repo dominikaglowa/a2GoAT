@@ -9,9 +9,9 @@ Add-Random-Cut: 50 150
 
 # Set target mass (for standard physics library)
 #Target-Mass: 938.272
-Target-Mass: 107961.738
+#Target-Mass: 107961.738
 #Target-Mass: 111688.180
-#Target-Mass: 115417.416
+Target-Mass: 115417.416
 
 # cut on the tagger channel (for standard physics library)
 Tagger-Channel-Cut: 200 300
