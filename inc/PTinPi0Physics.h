@@ -62,8 +62,14 @@ public:
     void FillDeltaE_Thetapi0(const GTreeMeson& tree);
     void FillDeltaE_Thetapi0(const GTreeMeson& tree, Int_t particle_index);
     void FillDeltaE_Thetapi0(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
-	//
-
+    
+    void FillDeltaE_Thetapi0_corr1(const GTreeMeson& tree);
+    void FillDeltaE_Thetapi0_corr1(const GTreeMeson& tree, Int_t particle_index);
+    void FillDeltaE_Thetapi0_corr1(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
+    
+    void FillDeltaE_Thetapi0_corr2(const GTreeMeson& tree);
+    void FillDeltaE_Thetapi0_corr2(const GTreeMeson& tree, Int_t particle_index);
+    void FillDeltaE_Thetapi0_corr2(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
 
 };
 #endif
