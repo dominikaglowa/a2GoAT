@@ -99,7 +99,8 @@ public:
 	/* void FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, GH2** gHist, Bool_t TaggerBinning = kFALSE); */
 	/* void FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index, GH2** gHist, Bool_t TaggerBinning = kFALSE); */
 	Double_t CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
-
+	Double_t CalcDeltaED_corr(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
+	
 	Double_t CalcMissingMomentumD(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
 
 	//
