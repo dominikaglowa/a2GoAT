@@ -541,6 +541,68 @@ Double_t PPhysicsTin::CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, 
   
 }
 
+Double_t PPhysicsTin::CalcDeltaED_corr(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index) {
+  
+  beam 		= TLorentzVector(0.,0.,GetTagger()->GetTaggedEnergy(tagger_index),GetTagger()->GetTaggedEnergy(tagger_index));
+ 
+ 
+  int n_sub_part;
+  
+  Double_t  E1, E2;
+  Double_t E_diff=10000; // Value out of range in case one does not have just 2 photons
+
+  // number of meson is ever 1 on the tree
+  n_sub_part = tree.GetNSubParticles(0);
+  //  Int_t n_sub_phot_ind[n_sub_part];
+  std::vector<Int_t> n_sub_phot_ind=tree.GetTrackIndexList(0);
+  
+  // TLorentzVector gamma[n_sub_part];
+  //int i=0;
+  //int j;
+  //if ( n_sub_part ==2) {
+  //for(std::vector<Int_t>::iterator j=n_sub_phot_ind.begin();j!=n_sub_phot_ind.end();++j) {
+  //gamma[i] =   GetTracks()->GetVector(*j);
+  //i++;
+  // }
+    // std::for_each( n_sub_phot_ind.begin(), n_sub_phot_ind.end(),[&](Int_t n){
+    // 	gamma[i] =   GetTracks()->GetVector(n);
+    // 	i++;
+    //   });
+  TLorentzVector gamma1 = GetTracks()->GetVector(n_sub_phot_ind[0]);
+  TLorentzVector gamma2 = GetTracks()->GetVector(n_sub_phot_ind[1]);
+
+
+    E1 = gamma1.E(); // photon 1 energy
+    E2 = gamma2.E(); // photon 2 energy
+    
+    TVector3 v3_gamma1 = gamma1.Vect();
+    TVector3 v3_gamma2 = gamma2.Vect();
+    TVector3 v_shift(0.,0.,0.44);
+    v3_gamma1 = v3_gamma1 - v_shift;
+    v3_gamma2 = v3_gamma2 - v_shift;
+    
+    gamma1.SetVect(v3_gamma1);
+    gamma2.SetVect(v3_gamma2);
+    // cout << E1 << " " << gamma1.Px() << " " << E2 << " " << gamma2.Px() << endl;
+
+    Double_t beta = (beam.E()/(beam.E() + target.M())); 
+    Double_t lorentz_gamma =  1/(sqrt(1 - beta*beta));
+    Double_t Xform = (E1 - E2)/(E1 + E2);
+    Double_t psi = gamma1.Vect().Angle(gamma2.Vect());
+    Double_t costheta1 = gamma1.CosTheta();
+    Double_t costheta2 = gamma2.CosTheta();
+    Double_t theta1 = gamma1.Theta()/TMath::Pi()*180;
+    Double_t theta2 = gamma2.Theta()/TMath::Pi()*180;
+    Double_t mpi0 = 134.9766;
+    Double_t M = target.M();
+    Double_t Egamma=beam.E();
+    if (theta1 > 25 && theta1<155 && theta2>25 &&theta2<155)	    E_diff = lorentz_gamma*((sqrt(2*mpi0*mpi0/((1-Xform*Xform)*(1-cos(psi))))) 
+			    - ( beta*(E1*costheta1 + E2*costheta2)) ) 
+      - ( (2*Egamma*M + mpi0*mpi0)/(2*sqrt(2*Egamma*M + M*M)) );
+      else E_diff = 80.; // return a value out of our range for histrograms if the value is not in CrystalBall, also assuming 5 degrees for full acceptance of the photon
+  return E_diff;
+  
+}
 
 Double_t PPhysicsTin::CalcMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index)
 {
