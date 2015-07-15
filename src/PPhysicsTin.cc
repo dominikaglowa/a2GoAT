@@ -520,7 +520,7 @@ Double_t PPhysicsTin::CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, 
     E1 = gamma1.E(); // photon 1 energy
     E2 = gamma2.E(); // photon 2 energy
     
-    // cout << E1 << " " << gamma1.Px() << " " << E2 << " " << gamma2.Px() << endl;
+    //cout << E1 << " " << gamma1.Px() << " " << E2 << " " << gamma2.Px() << endl;
 
     Double_t beta = (beam.E()/(beam.E() + target.M())); 
     Double_t lorentz_gamma =  1/(sqrt(1 - beta*beta));
@@ -533,6 +533,7 @@ Double_t PPhysicsTin::CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, 
     Double_t mpi0 = 134.9766;
     Double_t M = target.M();
     Double_t Egamma=beam.E();
+    //cout <<"theta2"<< theta2 << "   theta1" << theta1 << endl;
     if (theta1 > 25 && theta1<155 && theta2>25 &&theta2<155)	    E_diff = lorentz_gamma*((sqrt(2*mpi0*mpi0/((1-Xform*Xform)*(1-cos(psi))))) 
 			    - ( beta*(E1*costheta1 + E2*costheta2)) ) 
       - ( (2*Egamma*M + mpi0*mpi0)/(2*sqrt(2*Egamma*M + M*M)) );
@@ -540,6 +541,7 @@ Double_t PPhysicsTin::CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, 
   return E_diff;
   
 }
+
 
 Double_t PPhysicsTin::CalcDeltaED_corr(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index) {
   
