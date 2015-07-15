@@ -168,7 +168,7 @@ void	PTinPi0Physics::ProcessEvent()
       //my added histograms
 
 	    FillDeltaE_Missmom(*GetNeutralPions());
-	    FillDeltaE_Thetapi0(*GetNeutralPions());
+	    FillDeltaE_Thetapi0_corr2(*GetNeutralPions());
 	    FillDeltaE(*GetNeutralPions(),i,DeltaE_CM_D_2g);
 	    
 		// fill missing momentum, this pi0
@@ -247,7 +247,7 @@ void PTinPi0Physics::FillDeltaE_Missmom(const GTreeMeson& tree, Int_t particle_i
       //    cout << q << " " << DeltaE << " " << time << " " << Ebin << endl;
       //     DeltaE_Missmom_BeamE_Prompt[Ebin]->Fill(DeltaE,q);
       // gHist[qbin*nEbin+Ebin]->Fill(DeltaE,time);
-      //      cout << "DeltaE=" << DeltaE << "  q=" << q << "  time=" << time << " IsPrompt=" << GHistBGSub::IsPrompt(time) << " IsRandom=" << GHistBGSub::IsRandom(time) << endl; 
+      //    cout << "DeltaE=" << DeltaE << "  q=" << q << "  time=" << time << " IsPrompt=" << GHistBGSub::IsPrompt(time) << " IsRandom=" << GHistBGSub::IsRandom(time) << endl; 
 
       //      DeltaE_Missmom_BeamE[Ebin]->Fill(DeltaE,q,time);
       if (GHistBGSub::IsPrompt(time)) {
@@ -359,7 +359,7 @@ void PTinPi0Physics::FillDeltaE_Thetapi0_corr1(const GTreeMeson& tree, Int_t par
   TLorentzVector particle	= tree.Particle(particle_index); 
   Double_t theta=particle.Theta()*TMath::RadToDeg();
   
-  TVector3 v_shift(0.0,0.0,0.44); 
+  TVector3 v_shift(0.0,0.0,0.00); 
   TVector3 v_part,v_part_new;
   v_part.SetMagThetaPhi(45.411,particle.Theta(),particle.Phi());
   v_part_new = v_part - v_shift;
@@ -382,6 +382,7 @@ void PTinPi0Physics::FillDeltaE_Thetapi0_corr1(const GTreeMeson& tree, Int_t par
       if (GHistBGSub::IsRandom(time)) {
     	DeltaE_Thetapi0_BeamE_Random[Ebin]->Fill(DeltaE,theta);
     	//Test_histo_h1_random->Fill(DeltaE);
+	
       }
     }
 }
@@ -423,11 +424,13 @@ void PTinPi0Physics::FillDeltaE_Thetapi0_corr2(const GTreeMeson& tree, Int_t par
   TLorentzVector particle	= tree.Particle(particle_index); 
   Double_t theta=particle.Theta()*TMath::RadToDeg();
 
-  TVector3 v_shift(0.0,0.0,0.44); 
+  TVector3 v_shift(0.0,0.0,-0.44); 
   TVector3 v_part,v_part_new;
   v_part.SetMagThetaPhi(45.411,particle.Theta(),particle.Phi());
   v_part_new = v_part - v_shift;
   theta = v_part_new.Theta()*TMath::RadToDeg();
+
+  //cout<< "theta" << theta << endl;
 
   Double_t E_beam=beam2.E();
   Double_t DeltaE=CalcDeltaED_corr(tree,particle_index,tagger_index);
