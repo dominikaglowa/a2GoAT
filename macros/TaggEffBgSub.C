@@ -33,7 +33,7 @@ void TaggEffBgSub(TString sBeam, TString sBkg1, TString sBkg2="", Bool_t bFreeSc
     dBackInhib += hBkg2LiveTime->GetBinContent(hBkg2LiveTime->GetXaxis()->FindBin("Inhibited"));
   }
 
-  TFile fOut("TaggEff.root","RECREATE");
+  TFile fOut("TaggEff_sn120_4c.root","RECREATE");
 
   TH1D *hEffAllHits = (TH1D*)hBeamAllHits->Clone("TaggEffAllHits");
   TH1D *hEffSingles = (TH1D*)hBeamSingles->Clone("TaggEffSingles");
