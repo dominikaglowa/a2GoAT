@@ -58,9 +58,16 @@ PTinPi0Physics::PTinPi0Physics()
       sprintf(Title2,"Prompt DeltaE_{CM} 2 #gamma for E_{bin}=%i; DeltaE_{CM}(MeV); q(fm^{-1})",j);
       DeltaE_Missmom_BeamE_Prompt[j] = new TH2F(Title,Title2,100,-60,60,300,0.0,1.5);
 
-      sprintf(Title,"pimissen_r_DE_E_%d",j);
-      sprintf(Title2,"random DeltaE_{CM} 2 #gamma for E_{bin}=%i; DeltaE_{CM}(MeV); q(fm^{-1})",j);
-      DeltaE_Missmom_BeamE_Random[j] = new TH2F(Title,Title2,100,-60,60,300,0.0,1.5);
+      sprintf(Title,"pit_time_r_DE_E_%d",j);
+      sprintf(Title2,"random time DeltaE_{CM} 2 #gamma for E_{bin}=%i; DeltaE_{CM}(MeV); tagget time",j);
+      DeltaE_taggtime_BeamE_Random[j] = new TH2F(Title,Title2,100,-60,60,300,-150,150);
+
+
+      sprintf(Title,"pit_time_pr_DE_E_%d",j);
+      sprintf(Title2,"Prompt time DeltaE_{CM} 2 #gamma for E_{bin}=%i; DeltaE_{CM}(MeV); tagget time",j);
+      DeltaE_taggtime_BeamE_Prompt[j] = new TH2F(Title,Title2,100,-60,60,300,-150,150);
+
+
 
 
       // for (int i=0; i<bin_q; i++) {
@@ -167,7 +174,7 @@ void	PTinPi0Physics::ProcessEvent()
 
       //my added histograms
 
-	    FillDeltaE_Missmom(*GetNeutralPions());
+	    //	    FillDeltaE_Missmom(*GetNeutralPions());
 	    FillDeltaE_Thetapi0_corr2(*GetNeutralPions());
 	    FillDeltaE(*GetNeutralPions(),i,DeltaE_CM_D_2g);
 	    
@@ -175,7 +182,8 @@ void	PTinPi0Physics::ProcessEvent()
 	    FillMissingMomentum(*GetNeutralPions(),i,MMom_2g);
 		// fill missing momentum calculated using Dan routine, this pi0
 	    FillMissingMomentumD(*GetNeutralPions(),i,MMomD_2g);
-		//
+	    FillDeltaE_taggtime(*GetNeutralPions());
+	     //
 
         }
 
@@ -424,7 +432,7 @@ void PTinPi0Physics::FillDeltaE_Thetapi0_corr2(const GTreeMeson& tree, Int_t par
   TLorentzVector particle	= tree.Particle(particle_index); 
   Double_t theta=particle.Theta()*TMath::RadToDeg();
 
-  TVector3 v_shift(0.0,0.0,-0.44); 
+  TVector3 v_shift(0.0,0.0,-0.54); 
   TVector3 v_part,v_part_new;
   v_part.SetMagThetaPhi(45.411,particle.Theta(),particle.Phi());
   v_part_new = v_part - v_shift;
@@ -453,6 +461,83 @@ void PTinPi0Physics::FillDeltaE_Thetapi0_corr2(const GTreeMeson& tree, Int_t par
     }
 }
 
+void PTinPi0Physics::FillDeltaE_taggtime(const GTreeMeson& tree)
+{
+    for (Int_t i = 0; i < tree.GetNParticles(); i++)
+    {
+    for (Int_t j = 0; j < GetTagger()->GetNTagged(); j++)
+	{
+	  	FillDeltaE_taggtime(tree, i, j);
+	}
+    }
+}
+
+
+void PTinPi0Physics::FillDeltaE_taggtime(const GTreeMeson& tree, Int_t particle_index)
+{
+    for (Int_t i = 0; i < GetTagger()->GetNTagged(); i++)
+	{
+	  	FillDeltaE_taggtime(tree, particle_index, i);
+	}
+}
+
+
+void PTinPi0Physics::FillDeltaE_taggtime(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index)
+{ 
+
+  //  cout << "here" << endl;
+  Double_t time = GetTagger()->GetTaggedTime(tagger_index) - tree.GetTime(particle_index);
+  Double_t time2 = GetTagger()->GetTaggedTime(tagger_index);
+ TLorentzVector beam2(0.,0.,GetTagger()->GetTaggedEnergy(tagger_index),GetTagger()->GetTaggedEnergy(tagger_index));  
+
+  double thetamin=0.0; //min and max in fm^-1
+  double thetamax=180;
+  int nthetabin = 180;
+  int thetabin;
+  int nEbin=23;
+  int Ebin=-1;
+  double Ebin_v[] = {135,140,145,150,160,170,180,190,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,580};
+  TLorentzVector particle	= tree.Particle(particle_index); 
+  Double_t theta=particle.Theta()*TMath::RadToDeg();
+
+  TVector3 v_shift(0.0,0.0,-0.54); 
+  TVector3 v_part,v_part_new;
+  v_part.SetMagThetaPhi(45.411,particle.Theta(),particle.Phi());
+  v_part_new = v_part - v_shift;
+  theta = v_part_new.Theta()*TMath::RadToDeg();
+
+  //cout<< "theta" << theta << endl;
+
+  Double_t E_beam=beam2.E();
+  Double_t DeltaE=CalcDeltaED_corr(tree,particle_index,tagger_index);
+  //  cout << "here2" << endl;
+
+    for (int i=0; i<nEbin; i++) {
+      if (E_beam >= Ebin_v[i] && E_beam<Ebin_v[i+1]) Ebin=i; 
+      //  cout << "here3" << endl;
+
+    }
+
+    if ( Ebin != -1) { 
+
+      if (GHistBGSub::IsPrompt(time)) {
+	//  cout << "here4a" << endl;
+ 
+  	DeltaE_taggtime_BeamE_Prompt[Ebin]->Fill(DeltaE,time2);
+    	//Test_histo_h1_prompt->Fill(DeltaE);
+	//  cout << "here4" << endl;
+  
+     }
+
+      if (GHistBGSub::IsRandom(time)) {
+	//  cout << "here5a" << endl;
+    	DeltaE_taggtime_BeamE_Random[Ebin]->Fill(DeltaE,time2);
+    	//Test_histo_h1_random->Fill(DeltaE);
+	//  cout << "here5" << endl;
+
+      }
+    }
+}
 
 
 //
