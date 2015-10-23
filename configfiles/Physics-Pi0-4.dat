@@ -1,0 +1,23 @@
+#=======================================================================
+# Config file for a Pi0 Analysis of GoAT-Trees
+#=======================================================================
+#
+# Set prompt and random windows (standard library and GH1 library)
+Set-Prompt-Cut: -10 20
+Add-Random-Cut: -150 -50
+Add-Random-Cut: 50 150 
+
+# Set target mass (for standard physics library)
+#Target-Mass: 938.272
+#Target-Mass: 96927.123
+#Target-Mass: 107961.738
+#Target-Mass: 111688.180
+#Target-Mass: 115417.416
+Target-Mass: 193729.0036
+
+# cut on the tagger channel (for standard physics library)
+Tagger-Channel-Cut: 200 300
+
+# where are the tagger scalers?
+#Tagger-Scalers: 268 619
+Tagger-Scalers: 204 555
