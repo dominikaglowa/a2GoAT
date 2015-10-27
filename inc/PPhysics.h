@@ -140,5 +140,25 @@ public:
 
     Bool_t  RejectTagged(Int_t tagger_index);
     Bool_t  RejectDouble(Int_t tagger_index);
+
+	//my added histograms
+	void	FillMissingMomentum(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void	FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void 	FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+
+	Double_t CalcMissingMomentum(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
+	void	FillMissingMomentumD(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void	FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void 	FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void FillDeltaE(const GTreeMeson& tree, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void FillDeltaE(const GTreeMeson& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	void FillDeltaE(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning = kFALSE);
+	Double_t CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
+	Double_t CalcDeltaED_corr(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
+	
+	Double_t CalcMissingMomentumD(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
+
+
+
 };
 #endif

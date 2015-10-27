@@ -6,8 +6,8 @@ PPhysics::PPhysics()
 {
 	TC_cut_min = 0;
 	TC_cut_max = 352;
-    TC_scaler_min = 400;
-    TC_scaler_max = 751;
+    TC_scaler_min = 204;
+    TC_scaler_max = 555;
     LT_scaler_clock = 0;
     LT_scaler_inhib = 1;
     scalerHists = new TObjArray();
@@ -691,6 +691,239 @@ void	PPhysics::ProcessScalerRead()
             i++;
         }
     }
+}
+
+//my added histograms
+void PPhysics::FillMissingMomentum(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning)
+{
+	for (Int_t i = 0; i < tree.GetNParticles(); i++)
+	{
+		for (Int_t j = 0; j < GetTagger()->GetNTagged(); j++)
+		{
+			FillMissingMomentum(tree, i, j, gHist, TaggerBinning);
+		}
+	}
+}
+
+void PPhysics::FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning)
+{
+  for (Int_t i = 0; i < GetTagger()->GetNTagged(); i++)
+	{
+        FillMissingMomentum(tree, particle_index, i, gHist, TaggerBinning);
+	}
+}
+
+void PPhysics::FillMissingMomentum(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning)
+{
+    // Is tagger channel rejected by user?
+        if(GetTagger()->GetTaggedChannel(tagger_index) < TC_cut_min) return;
+	if(GetTagger()->GetTaggedChannel(tagger_index) > TC_cut_max) return;
+	
+    // calc particle time diff
+	time = GetTagger()->GetTaggedTime(tagger_index) - tree.GetTime(particle_index);
+
+    // calc missing p4
+	missingp4 = CalcMissingP4(tree, particle_index,tagger_index);
+
+    // Fill GH1
+	if(TaggerBinning)   gHist->Fill(missingp4.Rho()/197.3,time, GetTagger()->GetTaggedChannel(tagger_index));
+	else gHist->Fill(missingp4.Rho()/197.3,time);					
+
+}
+
+Double_t PPhysics::CalcMissingMomentum(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index)
+{
+    missingp4 	= CalcMissingP4(tree, particle_index, tagger_index);
+
+	return missingp4.Rho()/197.3;
+}
+
+void PPhysics::FillMissingMomentumD(const GTreeParticle& tree, GH1* gHist, Bool_t TaggerBinning)
+{
+	for (Int_t i = 0; i < tree.GetNParticles(); i++)
+	{
+		for (Int_t j = 0; j < GetTagger()->GetNTagged(); j++)
+		{
+			FillMissingMomentum(tree, i, j, gHist, TaggerBinning);
+		}
+	}
+}
+
+void PPhysics::FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning)
+{
+  for (Int_t i = 0; i < GetTagger()->GetNTagged(); i++)
+	{
+        FillMissingMomentum(tree, particle_index, i, gHist, TaggerBinning);
+	}
+}
+
+void PPhysics::FillMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning)
+{
+    // Is tagger channel rejected by user?
+        if(GetTagger()->GetTaggedChannel(tagger_index) < TC_cut_min) return;
+	if(GetTagger()->GetTaggedChannel(tagger_index) > TC_cut_max) return;
+	
+    // calc particle time diff
+	time = GetTagger()->GetTaggedTime(tagger_index) - tree.GetTime(particle_index);
+
+	particle	= tree.Particle(particle_index);
+	beam 		= TLorentzVector(0.,0.,GetTagger()->GetTaggedEnergy(tagger_index),GetTagger()->GetTaggedEnergy(tagger_index));
+  
+  
+	double theta_pi0 = particle.Theta(); // theta pi0
+	double mpi0 = 134.9766;
+	double costheta = TMath::Cos(theta_pi0);
+	double beta = beam.E()/(beam.E()+target.M());
+	double Egamma_c = beam.E()*TMath::Sqrt( (1-beta)/(1+beta) );
+	double gamma_l = 1./(TMath::Sqrt(1-beta*beta));
+	double minv = 2*beam.E()*target.M() + target.M2();
+	double Epi_c = TMath::Sqrt(minv)/2. + (mpi0*mpi0 - target.M2())/(2.*TMath::Sqrt(minv));
+	double Epi = (Epi_c + TMath::Sqrt( Epi_c*Epi_c - ( 1 - beta*beta*costheta*costheta )*( gamma_l*gamma_l*beta*beta*mpi0*mpi0*costheta*costheta + Epi_c*Epi_c ) ) ) / ( gamma_l*(1-beta*beta*costheta*costheta) );
+
+	double qsq = (Egamma_c - Epi_c)*(Egamma_c - Epi_c) + 2.*beam.E()*(Epi - TMath::Sqrt(Epi*Epi - mpi0*mpi0)*costheta) - mpi0*mpi0;
+
+	Double_t q = TMath::Sqrt(qsq)/197.3;
+
+	    // Fill GH1
+	if(TaggerBinning)   gHist->Fill(q,time, GetTagger()->GetTaggedChannel(tagger_index));
+	else gHist->Fill(q,time);
+				
+
+}
+
+void PPhysics::FillDeltaE(const GTreeMeson& tree, GH1* gHist, Bool_t TaggerBinning)
+{
+	for (Int_t i = 0; i < tree.GetNParticles(); i++)
+	{
+		for (Int_t j = 0; j < GetTagger()->GetNTagged(); j++)
+		{
+			FillDeltaE(tree, i, j, gHist,TaggerBinning);
+		}
+	}
+}
+
+void PPhysics::FillDeltaE(const GTreeMeson& tree, Int_t particle_index, GH1* gHist, Bool_t TaggerBinning)
+{
+    for (Int_t i = 0; i < GetTagger()->GetNTagged(); i++)
+	{
+        FillDeltaE(tree, particle_index, i, gHist,TaggerBinning);
+	}
+}
+
+void PPhysics::FillDeltaE(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning)
+{
+
+  // Is tagger channel rejected by user?
+  if(GetTagger()->GetTaggedChannel(tagger_index) < TC_cut_min) return;
+  if(GetTagger()->GetTaggedChannel(tagger_index) > TC_cut_max) return;
+    // calc particle time diff
+    time = GetTagger()->GetTaggedTime(tagger_index) - tree.GetTime(particle_index);
+    
+    // Fill GH1
+    gHist->Fill(CalcDeltaED(tree,particle_index,tagger_index),time);					
+
+}
+
+Double_t PPhysics::CalcDeltaED(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index) {
+  
+  beam 		= TLorentzVector(0.,0.,GetTagger()->GetTaggedEnergy(tagger_index),GetTagger()->GetTaggedEnergy(tagger_index));
+ 
+ 
+  int n_sub_part;
+  
+  Double_t  E1, E2;
+  Double_t E_diff=10000; // Value out of range in case one does not have just 2 photons
+
+  // number of meson is ever 1 on the tree
+  n_sub_part = tree.GetNSubParticles(0);
+  //  Int_t n_sub_phot_ind[n_sub_part];
+  std::vector<Int_t> n_sub_phot_ind=tree.GetTrackIndexList(0);
+
+  TLorentzVector gamma1 = GetTracks()->GetVector(n_sub_phot_ind[0]);
+  TLorentzVector gamma2 = GetTracks()->GetVector(n_sub_phot_ind[1]);
+
+
+    E1 = gamma1.E(); // photon 1 energy
+    E2 = gamma2.E(); // photon 2 energy
+    
+    //cout << E1 << " " << gamma1.Px() << " " << E2 << " " << gamma2.Px() << endl;
+
+    Double_t beta = (beam.E()/(beam.E() + target.M())); 
+    Double_t lorentz_gamma =  1/(sqrt(1 - beta*beta));
+    Double_t Xform = (E1 - E2)/(E1 + E2);
+    Double_t psi = gamma1.Vect().Angle(gamma2.Vect());
+    Double_t costheta1 = gamma1.CosTheta();
+    Double_t costheta2 = gamma2.CosTheta();
+    Double_t theta1 = gamma1.Theta()/TMath::Pi()*180;
+    Double_t theta2 = gamma2.Theta()/TMath::Pi()*180;
+    Double_t mpi0 = 134.9766;
+    Double_t M = target.M();
+    Double_t Egamma=beam.E();
+    //cout <<"theta2"<< theta2 << "   theta1" << theta1 << endl;
+    if (theta1 > 25 && theta1<155 && theta2>25 &&theta2<155)	    E_diff = lorentz_gamma*((sqrt(2*mpi0*mpi0/((1-Xform*Xform)*(1-cos(psi))))) 
+			    - ( beta*(E1*costheta1 + E2*costheta2)) ) 
+      - ( (2*Egamma*M + mpi0*mpi0)/(2*sqrt(2*Egamma*M + M*M)) );
+      else E_diff = 80.; // return a value out of our range for histrograms if the value is not in CrystalBall, also assuming 5 degrees for full acceptance of the photon
+  return E_diff;
+  
+}
+
+Double_t PPhysics::CalcDeltaED_corr(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index) {
+  
+  beam 		= TLorentzVector(0.,0.,GetTagger()->GetTaggedEnergy(tagger_index),GetTagger()->GetTaggedEnergy(tagger_index));
+ 
+ 
+  int n_sub_part;
+  
+  Double_t  E1, E2;
+  Double_t E_diff=10000; // Value out of range in case one does not have just 2 photons
+
+  // number of meson is ever 1 on the tree
+  n_sub_part = tree.GetNSubParticles(0);
+  //  Int_t n_sub_phot_ind[n_sub_part];
+  std::vector<Int_t> n_sub_phot_ind=tree.GetTrackIndexList(0);
+  
+TLorentzVector gamma1 = GetTracks()->GetVector(n_sub_phot_ind[0]);
+  TLorentzVector gamma2 = GetTracks()->GetVector(n_sub_phot_ind[1]);
+
+
+    E1 = gamma1.E(); // photon 1 energy
+    E2 = gamma2.E(); // photon 2 energy
+    
+    TVector3 v3_gamma1 = gamma1.Vect();
+    TVector3 v3_gamma2 = gamma2.Vect();
+    TVector3 v_shift(0.,0.,0.44);
+    v3_gamma1 = v3_gamma1 - v_shift;
+    v3_gamma2 = v3_gamma2 - v_shift;
+    
+    gamma1.SetVect(v3_gamma1);
+    gamma2.SetVect(v3_gamma2);
+    // cout << E1 << " " << gamma1.Px() << " " << E2 << " " << gamma2.Px() << endl;
+
+    Double_t beta = (beam.E()/(beam.E() + target.M())); 
+    Double_t lorentz_gamma =  1/(sqrt(1 - beta*beta));
+    Double_t Xform = (E1 - E2)/(E1 + E2);
+    Double_t psi = gamma1.Vect().Angle(gamma2.Vect());
+    Double_t costheta1 = gamma1.CosTheta();
+    Double_t costheta2 = gamma2.CosTheta();
+    Double_t theta1 = gamma1.Theta()/TMath::Pi()*180;
+    Double_t theta2 = gamma2.Theta()/TMath::Pi()*180;
+    Double_t mpi0 = 134.9766;
+    Double_t M = target.M();
+    Double_t Egamma=beam.E();
+    if (theta1 > 25 && theta1<155 && theta2>25 &&theta2<155)	    E_diff = lorentz_gamma*((sqrt(2*mpi0*mpi0/((1-Xform*Xform)*(1-cos(psi))))) 
+			    - ( beta*(E1*costheta1 + E2*costheta2)) ) 
+      - ( (2*Egamma*M + mpi0*mpi0)/(2*sqrt(2*Egamma*M + M*M)) );
+      else E_diff = 80.; // return a value out of our range for histrograms if the value is not in CrystalBall, also assuming 5 degrees for full acceptance of the photon
+  return E_diff;
+  
+}
+
+Double_t PPhysics::CalcMissingMomentumD(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index)
+{
+    missingp4 	= CalcMissingP4(tree, particle_index, tagger_index);
+
+	return missingp4.Rho()/197.3;
 }
 
 #endif

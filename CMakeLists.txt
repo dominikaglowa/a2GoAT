@@ -144,8 +144,8 @@ add_executable(TaggEff
 target_link_libraries(TaggEff goatbase ghist ${LIBS} ${ROOT_LIBRARIES})
 
 add_executable(tin-pi0-physics
-   inc/PPhysicsTin.h
-   src/PPhysicsTin.cc
+   inc/PPhysics.h
+   src/PPhysics.cc
    inc/PTinPi0Physics.h
    src/PTinPi0Physics.cc
    src/tin_pi0-physics_main.cc

@@ -14,7 +14,7 @@ PTinPi0Physics::PTinPi0Physics()
     MM		= new GH1("MM", 	"MM", 	 	400,   107800, 108200);     
     MM_2g	= new GH1("MM_2g", 	"MM_2g", 	400,  107800, 108200);
 
-    TaggerAccScal = new TH1D("TaggerAccScal","TaggerAccScal",352,0,352);
+    //TaggerAccScal = new TH1D("TaggerAccScal","TaggerAccScal",352,0,352);
 
     //my added histograms
 
@@ -107,10 +107,22 @@ Bool_t	PTinPi0Physics::Init()
 	cout << "Initialising physics analysis..." << endl;
 	cout << "--------------------------------------------------" << endl << endl;
 
+	//if(!InitBackgroundCuts()) return kFALSE;
+	//if(!InitTargetMass()) return kFALSE;
+	//if(!InitTaggerChannelCuts()) return kFALSE;
+	//if(!InitTaggerScalers()) return kFALSE;
+    
 	if(!InitBackgroundCuts()) return kFALSE;
-	if(!InitTargetMass()) return kFALSE;
-	if(!InitTaggerChannelCuts()) return kFALSE;
-	if(!InitTaggerScalers()) return kFALSE;
+
+	if(!PPhysics::Init()) return kFALSE;
+
+	TaggerAccScal = GetScalerHist("TaggerAccScal");
+	if(!TaggerAccScal)
+	  {
+	    cout << "No tagger scaler histogram available" << endl;
+	    return kFALSE;
+	  }
+
 	cout << "--------------------------------------------------" << endl;
 	return kTRUE;
 }
