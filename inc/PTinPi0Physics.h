@@ -42,7 +42,8 @@ private:
 
     TH2F*       DeltaE_taggtime_BeamE_Prompt[23];
     TH2F*       DeltaE_taggtime_BeamE_Random[23];
-    
+    TH1F*       Thetapi0_BeamE_Prompt[23];
+    TH1F*       Thetapi0_BeamE_Random[23];   
 
     //
 
@@ -77,7 +78,10 @@ public:
     void FillDeltaE_taggtime(const GTreeMeson& tree);
     void FillDeltaE_taggtime(const GTreeMeson& tree, Int_t particle_index);
     void FillDeltaE_taggtime(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
-
+    
+    void FillThetapi0_corr3(const GTreeMeson& tree);
+    void FillThetapi0_corr3(const GTreeMeson& tree, Int_t particle_index);
+    void FillThetapi0_corr3(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index);
 
 };
 #endif

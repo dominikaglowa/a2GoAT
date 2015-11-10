@@ -189,7 +189,7 @@ void	PTinPi0Physics::ProcessEvent()
 	    //	    FillDeltaE_Missmom(*GetNeutralPions());
 	    FillDeltaE_Thetapi0_corr2(*GetNeutralPions());
 	    FillDeltaE(*GetNeutralPions(),i,DeltaE_CM_D_2g);
-	    
+	    FillThetapi0_corr3(*GetNeutralPions());
 		// fill missing momentum, this pi0
 	    FillMissingMomentum(*GetNeutralPions(),i,MMom_2g);
 		// fill missing momentum calculated using Dan routine, this pi0
@@ -552,6 +552,80 @@ void PTinPi0Physics::FillDeltaE_taggtime(const GTreeMeson& tree, Int_t particle_
     }
 }
 
+void PTinPi0Physics::FillThetapi0_corr3(const GTreeMeson& tree)
+{
+    for (Int_t i = 0; i < tree.GetNParticles(); i++)
+    {
+    for (Int_t j = 0; j < GetTagger()->GetNTagged(); j++)
+	{
+	  FillThetapi0_corr3(tree, i, j);
+	}
+    }
+}
 
+void PTinPi0Physics::FillThetapi0_corr3(const GTreeMeson& tree, Int_t particle_index)
+{
+    for (Int_t i = 0; i < GetTagger()->GetNTagged(); i++)
+	{
+	  	FillThetapi0_corr3(tree, particle_index, i);
+	}
+}
+
+void PTinPi0Physics::FillThetapi0_corr3(const GTreeMeson& tree, Int_t particle_index, Int_t tagger_index)
+{ 
+
+  Double_t time = GetTagger()->GetTaggedTime(tagger_index) - tree.GetTime(particle_index);
+  TLorentzVector beam2(0.,0.,GetTagger()->GetTaggedEnergy(tagger_index),GetTagger()->GetTaggedEnergy(tagger_index));  
+
+  double thetamin=0.0; //min and max in fm^-1
+  double thetamax=180;
+  int nthetabin = 180;
+  int thetabin;
+  int nEbin=23;
+  int Ebin=-1;
+  double Ebin_v[] = {135,140,145,150,160,170,180,190,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,580};
+  TLorentzVector particle	= tree.Particle(particle_index); 
+  Double_t theta=particle.Theta()*TMath::RadToDeg();
+
+  TVector3 v_shift(0.0,0.0,-0.44); 
+  TVector3 v_part,v_part_new;
+  v_part.SetMagThetaPhi(45.411,particle.Theta(),particle.Phi());
+  v_part_new = v_part - v_shift;
+  theta = v_part_new.Theta()*TMath::RadToDeg();
+
+ 
+  //cout<< "theta:" << theta << endl;
+
+  Double_t E_beam=beam2.E();
+  Double_t DeltaE=CalcDeltaED_corr(tree,particle_index,tagger_index);
+
+  Double_t theta_rec = theta;
+  Double_t beam_en_rec = E_beam;
+
+  Double_t event_n_rec = GetEventParameters()->GetEventNumber();
+
+  //tree_pi0_res->Fill(); //needed for simulated files for smearing calcs
+  
+    for (int i=0; i<nEbin; i++) {
+      if (E_beam >= Ebin_v[i] && E_beam<Ebin_v[i+1]) Ebin=i; 
+    }
+     if ( Ebin != -1 && DeltaE > -60.0 && DeltaE < 60.) { 
+    // cout << DeltaE << endl;
+ 
+    //if ( Ebin != -1) { 
+
+      // cout << "in the deltae cut" << endl;
+      if (GHistBGSub::IsPrompt(time)) {
+   	Thetapi0_BeamE_Prompt[Ebin]->Fill(theta);
+	//cout<< "theta_corr3:" << theta << endl;
+    	//Test_histo_h1_prompt->Fill(DeltaE);
+      }
+
+      if (GHistBGSub::IsRandom(time)) {
+    	Thetapi0_BeamE_Random[Ebin]->Fill(theta);
+    	//Test_histo_h1_random->Fill(DeltaE);
+      }
+    }
+}
 //
 
