@@ -36,7 +36,7 @@ void TaggEffBgSub(TString sBeam, TString sBkg1, TString sBkg2="", Bool_t bFreeSc
   }
 
   cout << "Bcg Clock=" << dBackClock << "   Gcg Inhib=" << dBackInhib << endl;
-  TFile fOut("TaggEff_sn124.root","RECREATE");
+  TFile fOut("TaggEff_sn124_245.root","RECREATE");
 
   TH1D *hEffAllHits = (TH1D*)hBeamAllHits->Clone("hEffAllHits");
   TH1D *hEffAllHits2 = (TH1D*)hBeamAllHits->Clone("hEffAllHits2");

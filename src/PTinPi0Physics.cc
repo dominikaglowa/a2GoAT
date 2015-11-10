@@ -108,7 +108,7 @@ Bool_t	PTinPi0Physics::Init()
 	cout << "--------------------------------------------------" << endl << endl;
 
 	//if(!InitBackgroundCuts()) return kFALSE;
-	//if(!InitTargetMass()) return kFALSE;
+	if(!InitTargetMass()) return kFALSE;
 	//if(!InitTaggerChannelCuts()) return kFALSE;
 	//if(!InitTaggerScalers()) return kFALSE;
     
@@ -206,7 +206,8 @@ void	PTinPi0Physics::ProcessEvent()
 void	PTinPi0Physics::ProcessScalerRead()
 {
 	// Fill Tagger Scalers
-	FillScalers(GetTC_scaler_min(),GetTC_scaler_max(),TaggerAccScal);
+	//FillScalers(GetTC_scaler_min(),GetTC_scaler_max(),TaggerAccScal);
+        PPhysics::ProcessScalerRead();
 }
 
 Bool_t	PTinPi0Physics::Write()
@@ -444,7 +445,7 @@ void PTinPi0Physics::FillDeltaE_Thetapi0_corr2(const GTreeMeson& tree, Int_t par
   TLorentzVector particle	= tree.Particle(particle_index); 
   Double_t theta=particle.Theta()*TMath::RadToDeg();
 
-  TVector3 v_shift(0.0,0.0,-0.54); 
+  TVector3 v_shift(0.0,0.0,-0.44); 
   TVector3 v_part,v_part_new;
   v_part.SetMagThetaPhi(45.411,particle.Theta(),particle.Phi());
   v_part_new = v_part - v_shift;
@@ -512,7 +513,7 @@ void PTinPi0Physics::FillDeltaE_taggtime(const GTreeMeson& tree, Int_t particle_
   TLorentzVector particle	= tree.Particle(particle_index); 
   Double_t theta=particle.Theta()*TMath::RadToDeg();
 
-  TVector3 v_shift(0.0,0.0,-0.54); 
+  TVector3 v_shift(0.0,0.0,-0.44); 
   TVector3 v_part,v_part_new;
   v_part.SetMagThetaPhi(45.411,particle.Theta(),particle.Phi());
   v_part_new = v_part - v_shift;
